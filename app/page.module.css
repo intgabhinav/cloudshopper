@@ -1,0 +1,42 @@
+/* app/page.module.css */
+
+.container {
+    padding: 20px;
+  }
+  
+  .boxes {
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;
+    margin-bottom: 40px;
+  }
+  
+  .box {
+    width: 200px;
+    height: 250px;
+    border: 1px solid #ccc;
+    padding: 10px;
+    text-align: center;
+  }
+  
+  .radioButtonContainer {
+    margin-top: 10px;
+  }
+  
+  /* Apply styles to the radio input */
+  .radioInput {
+    margin-right: 10px;
+  }
+  
+  /* Apply global styles to all h3 elements */
+  :global(h3) {
+    font-size: 16px;
+    margin-bottom: 10px;
+  }
+  
+  img {
+    width: 100%;
+    height: auto;
+    margin-bottom: 10px;
+  }
+  

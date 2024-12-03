@@ -19,3 +19,8 @@ body {
   background: var(--background);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* app/styles/globals.css */
+input[type="radio"] {
+  margin-right: 10px;
+}
