@@ -1,18 +1,26 @@
 "use client";
 import { useState } from "react";
 
-
 export default function Home() {
   const [secondSet, setSecondSet] = useState([]);
+  const [selectedSecondSetOption, setSelectedSecondSetOption] = useState(null); // Track selected option
 
   const handleOptionChange = async (option) => {
-    // Make a fetch request to the dynamic API route
-    const response = await fetch(`/api/options/${option}`);
-    const data = await response.json();
-    setSecondSet(data);  // Set the data to render the next set of boxes
+    try {
+      const response = await fetch(`/api/options/${option}`);
+      if (!response.ok) throw new Error("Failed to fetch options");
+      const data = await response.json();
+      setSecondSet(data); // Set the data to render the next set of boxes
+      setSelectedSecondSetOption(null); // Reset selection
+    } catch (error) {
+      console.error(error);
+      alert("Something went wrong. Please try again.");
+    }
   };
 
-  
+  const handleSecondSetSelection = (itemId) => {
+    setSelectedSecondSetOption(itemId);
+  };
 
   return (
     <div style={{ padding: "20px" }}>
@@ -81,9 +89,21 @@ export default function Home() {
           >
             <img src={item.image} alt={item.title} style={{ width: "80%", borderRadius: "5px" }} />
             <p>{item.title}</p>
+            <div style={{ marginTop: "10px" }}>
+              <input
+                type="radio"
+                name="secondSetChoice"
+                id={item.id}
+                checked={selectedSecondSetOption === item.id}
+                onChange={() => handleSecondSetSelection(item.id)}
+              />
+              <label htmlFor={item.id}></label>
+            </div>
           </div>
         ))}
       </div>
+
+      {selectedSecondSetOption && <p>You selected: {selectedSecondSetOption}</p>}
     </div>
   );
 }
