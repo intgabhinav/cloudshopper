@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 
+
 export default function Home() {
   const [secondSet, setSecondSet] = useState([]);
 
@@ -15,7 +16,7 @@ export default function Home() {
 
   return (
     <div style={{ padding: "20px" }}>
-      <h1>Select Your</h1>
+      <h1>Select Your Bundle</h1>
 
       {/* First Set of Boxes */}
       <div style={{ display: "flex", justifyContent: "space-evenly", marginBottom: "20px" }}>
@@ -32,11 +33,11 @@ export default function Home() {
             boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
           }}
         >
-          <img src="https://via.placeholder.com/150/92c952" alt="Option 1" style={{ width: "80%", borderRadius: "5px" }} />
+          <img src="https://via.placeholder.com/150/92c952" alt="Magento" style={{ width: "80%", borderRadius: "5px" }} />
           <p>Magento</p>
           <div style={{ position: "absolute", bottom: "10px", left: "50%", transform: "translateX(-50%)" }}>
-            <input type="radio" name="choice" id="option1" onChange={() => handleOptionChange("option1")} />
-            <label htmlFor="option1"></label>
+            <input type="radio" name="choice" id="magento" onChange={() => handleOptionChange("magento")} />
+            <label htmlFor="magento"></label>
           </div>
         </div>
         <div
@@ -52,11 +53,11 @@ export default function Home() {
             boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
           }}
         >
-          <img src="https://via.placeholder.com/150/771796" alt="Option 2" style={{ width: "80%", borderRadius: "5px" }} />
+          <img src="https://via.placeholder.com/150/771796" alt="WordPress" style={{ width: "80%", borderRadius: "5px" }} />
           <p>WordPress</p>
           <div style={{ position: "absolute", bottom: "10px", left: "50%", transform: "translateX(-50%)" }}>
-            <input type="radio" name="choice" id="option2" onChange={() => handleOptionChange("option2")} />
-            <label htmlFor="option2"></label>
+            <input type="radio" name="choice" id="wordpress" onChange={() => handleOptionChange("wordpress")} />
+            <label htmlFor="wordpress"></label>
           </div>
         </div>
       </div>
