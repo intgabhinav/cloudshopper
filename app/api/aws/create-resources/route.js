@@ -7,6 +7,7 @@ export const runtime = "nodejs"; // Ensure server-side runtime
 // POST /api/aws/create-resources
 export async function POST(req) {
   const body = await req.json();
+  console.log("Received data:", body);
 
   const { selectedFirstOption, selectedSecondSetOption, inputFields } = body;
 
@@ -16,7 +17,7 @@ export async function POST(req) {
       { status: 400 }
     );
   }
-
+  console.log(inputFields.sitename);
   // AWS Configuration
   const region = process.env.AWS_REGION || "us-east-1";
   const ec2Client = new EC2Client({ region });
@@ -80,7 +81,7 @@ export async function POST(req) {
     // resources.dbInstanceId = dbResponse.DBInstance.DBInstanceIdentifier;
 
     // Step 5: Create S3 Bucket
-    const bucketName = `mybucketabc123ant`; // Generate a unique bucket name
+    const bucketName = inputFields.sitename; // Generate a unique bucket name
     const bucketCommand = new CreateBucketCommand({
       Bucket: bucketName,
       CreateBucketConfiguration: {

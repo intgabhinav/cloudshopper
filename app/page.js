@@ -55,7 +55,7 @@ export default function Home() {
     };
 
     try {
-      const response = await fetch(`/api/aws/create-resources`, {
+      const response = await fetch(`/api/builder`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
@@ -158,23 +158,52 @@ export default function Home() {
             <h2>Additional Information</h2>
             {inputFields.map((field) => (
               <div key={field.id} style={{ marginBottom: "10px" }}>
-                <label htmlFor={field.id} style={{ display: "block", marginBottom: "5px" }}>
-                  {field.label}
-                </label>
-                <input
-                  type={field.type}
-                  id={field.id}
-                  name={field.name}
-                  placeholder={field.placeholder}
-                  value={formData[field.id] || ""}
-                  onChange={(e) => handleInputChange(field.id, e.target.value)}
-                  style={{
-                    width: "100%",
-                    padding: "8px",
-                    border: "1px solid #ccc",
-                    borderRadius: "5px",
-                  }}
-                />
+                {field.type === "dropdown" ? (
+                  <>
+                    <label htmlFor={field.id} style={{ display: "block", marginBottom: "5px" }}>
+                      {field.label}
+                    </label>
+                    <select
+                      id={field.id}
+                      name={field.name}
+                      value={formData[field.id] || ""}
+                      onChange={(e) => handleInputChange(field.id, e.target.value)}
+                      style={{
+                        width: "100%",
+                        padding: "8px",
+                        border: "1px solid #ccc",
+                        borderRadius: "5px",
+                      }}
+                    >
+                      <option value="">Select an option</option>
+                      {field.options.map((option) => (
+                        <option key={option.value} value={option.value}>
+                          {option.label}
+                        </option>
+                      ))}
+                    </select>
+                  </>
+                ) : (
+                  <>
+                    <label htmlFor={field.id} style={{ display: "block", marginBottom: "5px" }}>
+                      {field.label}
+                    </label>
+                    <input
+                      type={field.type}
+                      id={field.id}
+                      name={field.name}
+                      placeholder={field.placeholder}
+                      value={formData[field.id] || ""}
+                      onChange={(e) => handleInputChange(field.id, e.target.value)}
+                      style={{
+                        width: "100%",
+                        padding: "8px",
+                        border: "1px solid #ccc",
+                        borderRadius: "5px",
+                      }}
+                    />
+                  </>
+                )}
               </div>
             ))}
           </form>
