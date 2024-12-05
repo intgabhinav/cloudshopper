@@ -12,7 +12,7 @@ export async function POST(req) {
       { status: 400 }
     );
   }
-  
+
   const db = await connectToDatabase();
 
   const data = await db
@@ -33,7 +33,7 @@ export async function POST(req) {
     const orchestrator = await fetch("http://localhost:3000/api/orchestrator", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ region: item.region, resources: item.resources }), // Pass the item.resources,
+      body: JSON.stringify({ region: inputFields.region, resources: item.resources }), // Pass the item.resources,
     });
   //   console.log(`Bundle: ${item.bundle}`);
   //   console.log(`Plan: ${item.plan}`);
