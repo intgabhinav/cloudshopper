@@ -53,14 +53,17 @@ export default function Home() {
       selectedSecondSetOption,
       inputFields: formData,
     };
-
+    console.log("Payload:", payload);
+    console.log("PayloadJSON", JSON.stringify(payload));
     try {
       const response = await fetch(`/api/builder`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
-
+      
+    
+      
       if (!response.ok) throw new Error("Failed to create AWS resources");
       const result = await response.json();
       alert(`AWS resources created successfully! Task ID: ${result.taskId}`);
