@@ -28,21 +28,26 @@ export async function POST(req) {
   if (data.length === 0) {
     return new Response('Option not found', { status: 404 });
   }
-  data.forEach((item) => {
-    console.log(`Bundle: ${item.bundle}`);
-    console.log(`Plan: ${item.plan}`);
-    
-    item.resources.forEach((resource) => {
-      console.log(`  Resource Name: ${resource.name}`);
-      console.log(`  API Endpoint: ${resource.api}`);
-      console.log(`  Template ID: ${resource.templateid}`);
 
-      
+   data.forEach(async (item) => {
+    const orchestrator = await fetch("http://localhost:3000/api/orchestrator", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ region: item.region, resources: item.resources }), // Pass the item.resources,
     });
-  });
+  //   console.log(`Bundle: ${item.bundle}`);
+  //   console.log(`Plan: ${item.plan}`);
+    
+  //   item.resources.forEach((resource) => {
+  //     console.log(`  Resource Name: ${resource.name}`);
+  //     console.log(`  API Endpoint: ${resource.api}`);
+  //     console.log(`  Template ID: ${resource.templateid}`);
+  //   });
+   });
+
+
   // Return the data as JSON
-  console.log("Query result:", data);
-  return new Response(JSON.stringify(data), {
+  return new Response(JSON.stringify(body), {
     headers: { 'Content-Type': 'application/json' },
   });
 }
