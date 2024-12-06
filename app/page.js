@@ -1,24 +1,26 @@
 "use client";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 export default function Home() {
+  const router = useRouter();
   const [secondSet, setSecondSet] = useState([]);
-  const [selectedFirstOption, setSelectedFirstOption] = useState(null); // Track first selection
-  const [selectedSecondSetOption, setSelectedSecondSetOption] = useState(null); // Track second selection
-  const [inputFields, setInputFields] = useState([]); // Store dynamically generated input fields
-  const [formData, setFormData] = useState({}); // Store values of input fields
+  const [bundle, setbundle] = useState(null);
+  const [plan, setplan] = useState(null);
+  const [inputFields, setInputFields] = useState([]);
+  const [formData, setFormData] = useState({});
 
   const handleOptionChange = async (option) => {
-    setSelectedFirstOption(option);
+    setbundle(option);
 
     try {
       const response = await fetch(`/api/options/${option}`);
       if (!response.ok) throw new Error("Failed to fetch options");
       const data = await response.json();
-      setSecondSet(data); // Set the data to render the next set of boxes
-      setSelectedSecondSetOption(null); // Reset selection
-      setInputFields([]); // Reset input fields
-      setFormData({}); // Reset form data
+      setSecondSet(data);
+      setplan(null);
+      setInputFields([]);
+      setFormData({});
     } catch (error) {
       console.error(error);
       alert("Something went wrong. Please try again.");
@@ -26,14 +28,14 @@ export default function Home() {
   };
 
   const handleSecondSetSelection = async (itemId) => {
-    setSelectedSecondSetOption(itemId);
+    setplan(itemId);
 
     try {
       const response = await fetch(`/api/options/${itemId}`);
       if (!response.ok) throw new Error("Failed to fetch input fields");
       const data = await response.json();
-      setInputFields(data); // Update input fields based on the response
-      setFormData({}); // Reset form data
+      setInputFields(data);
+      setFormData({});
     } catch (error) {
       console.error(error);
       alert("Unable to fetch input fields. Please try again.");
@@ -49,8 +51,8 @@ export default function Home() {
 
   const handleSubmit = async () => {
     const payload = {
-      selectedFirstOption,
-      selectedSecondSetOption,
+      bundle,
+      plan,
       inputFields: formData,
     };
 
@@ -60,12 +62,12 @@ export default function Home() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
-      
-    
-      
+
       if (!response.ok) throw new Error("Failed to create AWS resources");
       const result = await response.json();
-      alert(`AWS resources created successfully! Task ID: ${result}`);
+
+      // Navigate to review page with data
+      router.push(`/review?data=${encodeURIComponent(JSON.stringify(result))}`);
     } catch (error) {
       console.error(error);
       alert("Failed to send data. Please try again.");
@@ -144,7 +146,7 @@ export default function Home() {
                 type="radio"
                 name="secondSetChoice"
                 id={item.id}
-                checked={selectedSecondSetOption === item.id}
+                checked={plan === item.id}
                 onChange={() => handleSecondSetSelection(item.id)}
               />
               <label htmlFor={item.id}></label>
@@ -225,7 +227,7 @@ export default function Home() {
             cursor: "pointer",
           }}
         >
-          Send
+          Submit
         </button>
       </div>
     </div>

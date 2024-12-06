@@ -1,20 +1,42 @@
-import { EC2Client, CreateVpcCommand } from "@aws-sdk/client-ec2";
-
-export const runtime = "nodejs";
+import AWS from "aws-sdk";
 
 export async function POST(req) {
-  const { cidrBlock } = await req.json();
+  const body = await req.json();
+  console.log("Received data:", body);
 
-  const ec2Client = new EC2Client({ region: process.env.AWS_REGION });
+  const { region, CidrBlock, name } = body;
+
+  // Validate request data
+  if (!region || !CidrBlock || !name) {
+    return new Response(
+      JSON.stringify({ error: "Missing required fields: region, CidrBlock, name" }),
+      { status: 400 }
+    );
+  }
+
+  const ec2 = new AWS.EC2({ region });
 
   try {
-    const command = new CreateVpcCommand({
-      CidrBlock: cidrBlock,
-      TagSpecifications: [{ ResourceType: "vpc", Tags: [{ Key: "Name", Value: "MyVPC" }] }],
-    });
-    const response = await ec2Client.send(command);
-    return new Response(JSON.stringify({ vpcId: response.Vpc.VpcId }), { status: 201 });
+    const params = {
+      CidrBlock,
+      TagSpecifications: [
+        {
+          ResourceType: "vpc",
+          Tags: [{ Key: "Name", Value: name }],
+        },
+      ],
+    };
+
+    const result = await ec2.createVpc(params).promise();
+    console.log("VPC Created:", result);
+
+    return new Response(JSON.stringify(result), { status: 200 });
   } catch (error) {
-    return new Response(JSON.stringify({ error: error.message }), { status: 500 });
+    console.error("Error creating VPC:", error.message);
+
+    return new Response(
+      JSON.stringify({ error: "Failed to create VPC", details: error.message }),
+      { status: 500 }
+    );
   }
 }
