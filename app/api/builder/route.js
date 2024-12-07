@@ -1,59 +1,68 @@
 import { connectToDatabase } from '../../../lib/mongodb';
 export const runtime = "nodejs"; // Ensure server-side runtime
 
-
-// POST /api/aws/create-resources
 export async function POST(req) {
-  const body = await req.json();
-  const { bundle, plan, inputFields } = body;
-  if (!bundle || !plan || !inputFields) {
-    return new Response(
-      JSON.stringify({ error: "Invalid request payload" }),
-      { status: 400 }
-    );
-  }
-  //console.log("Received data:", bundle, plan, inputFields);
-  const db = await connectToDatabase();
+  try {
+    const body = await req.json();
+    const { bundle, plan, inputFields } = body;
 
-  const data = await db
-  .collection('builder')
-  .find({ 
-    $and: [
-      { bundle: bundle }, 
-      { plan: plan }, 
-    ],
-  })
-  .toArray();
+    // Validate the payload
+    if (!bundle || !plan || !inputFields) {
+      return new Response(
+        JSON.stringify({ error: "Invalid request payload" }),
+        { status: 400, headers: { "Content-Type": "application/json" } }
+      );
+    }
 
-  if (data.length === 0) {
-    return new Response('Option not found', { status: 404 });
-  }
+    const db = await connectToDatabase();
 
-    data.forEach(async (item) => {
+    // Find data matching the `bundle` and `plan`
+    const data = await db
+      .collection('builder')
+      .find({ $and: [{ bundle: bundle }, { plan: plan }] })
+      .toArray();
 
-   // item.resources.forEach(async (resource) => {
-      // console.log(`  Resource Name: ${resource.name}`);
-      // console.log(`  API Endpoint: ${resource.api}`);
-      // console.log(`  Template ID: ${resource.templateid}`);
-      // console.log(`  Replacements: ${JSON.stringify(resource.replacements)}`);
+    if (data.length === 0) {
+      return new Response('Option not found', { status: 404 });
+    }
+
+    let insertedIds = []; // To keep track of inserted IDs
+    for (const item of data) {
       const replace = generateReplacements(item, inputFields);
       const updatedResources = replacePlaceholders(item, replace);
 
-      const orchestrator = await fetch("http://localhost:3000/api/orchestrator", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ resources: updatedResources }), // Pass the item.resources,
-    });
+      const order = await fetch("http://localhost:3000/api/store-data", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ resources: updatedResources }),
+      });
 
-   // });
+      const orderResponse = await order.json();
+      console.log(orderResponse.id);
+      if (orderResponse?.id) {
+        insertedIds.push(orderResponse.id); // Collect the inserted ID
+      }
+    }
 
-    });
-
-
-  // Return the data as JSON
-  return new Response(JSON.stringify(data), {
-    headers: { 'Content-Type': 'application/json' },
-  });
+    // Return the first ID (if relevant) or all inserted IDs
+    if (insertedIds.length > 0) {
+      return new Response(
+        JSON.stringify({ ids: insertedIds }),
+        { headers: { "Content-Type": "application/json" } }
+      );
+    } else {
+      return new Response(
+        JSON.stringify({ error: "Failed to store data" }),
+        { status: 500 }
+      );
+    }
+  } catch (error) {
+    console.error("Error in /api/builder:", error);
+    return new Response(
+      JSON.stringify({ error: "Internal server error" }),
+      { status: 500, headers: { "Content-Type": "application/json" } }
+    );
+  }
 }
 
 function replacePlaceholders(template, replacements) {
@@ -76,14 +85,12 @@ function replacePlaceholders(template, replacements) {
 
 function generateReplacements(template, body) {
   const replacements = {};
-//console.log(`Template: ${JSON.stringify(template)} + " " + ${JSON.stringify(body)}`);
   const extractPlaceholders = (obj) => {
     for (let key in obj) {
       if (typeof obj[key] === "object") {
         extractPlaceholders(obj[key]); // Recursively process nested objects
       } else if (typeof obj[key] === "string" && obj[key].startsWith("inputFields.")) {
         const fieldName = obj[key].replace("inputFields.", ""); // Extract the field name
-        //console.log(`Field Name: ${fieldName}`);
         if (body[fieldName] !== undefined) {
           replacements[fieldName] = body[fieldName]; // Add to replacements if it exists in `body`
         }

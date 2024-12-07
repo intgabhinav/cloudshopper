@@ -2,8 +2,6 @@ import AWS from "aws-sdk";
 
 export async function POST(req) {
   const body = await req.json();
-  console.log("Received data:", body);
-
   const { region, CidrBlock, name } = body;
 
   // Validate request data
