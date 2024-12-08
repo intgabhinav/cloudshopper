@@ -1,5 +1,4 @@
 "use client"; // Marks this as a client component
-
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 
@@ -13,18 +12,18 @@ export default function ReviewPage() {
   useEffect(() => {
     const fetchData = async () => {
       const id = searchParams.get("id"); // Get the `id` from the query parameter
-      console.log("Review", id);
       if (!id) {
         setError("ID not provided");
         return;
       }
 
       try {
-        const response = await fetch(`/api/store-data?id=${id}`); // API call to fetch data
+        const filter = JSON.stringify({ _id: id });
+        const response = await fetch(`/api/crud?collectionName=yourCollectionName&filter=${encodeURIComponent(filter)}`);
         if (!response.ok) throw new Error("Failed to fetch data");
 
         const result = await response.json();
-        setData(result);
+        setData(result.data);
       } catch (err) {
         console.error("Error fetching data:", err);
         setError(err.message || "An unexpected error occurred");
@@ -35,23 +34,22 @@ export default function ReviewPage() {
   }, [searchParams]);
 
   const handleSubmit = async () => {
-    const id = searchParams.get("id"); 
+    const id = searchParams.get("id");
     setLoading(true);
     try {
       const response = await fetch("/api/orchestrator", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({orderid : id}), // Pass the fetched data
+        body: JSON.stringify({ orderid: id }), // Pass the fetched data
       });
-      console.log("Response:", response);
 
       if (!response.ok) throw new Error("Submission failed");
 
-      //alert("Data successfully submitted!");
-      const result = await response.json(); // Assuming the response contains the `id`
-      console.log("Response:", result.id);
-      //const id = result.id; // Extract the ID from the response
-      router.push(`/pages/success?id=${result.id}`);; // Navigate to success page
+      const result = await response.json();
+      console.log("Response:", result);
+
+      // Navigate to the success page with the ID
+      router.push(`/pages/success?id=${result.id}`);
     } catch (error) {
       console.error("Error submitting data:", error);
       alert("Failed to submit data. Please try again.");

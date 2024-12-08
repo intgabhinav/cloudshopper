@@ -1,6 +1,7 @@
 import { connectToDatabase } from "@/lib/mongodb"; // Update the path if necessary
 import { ObjectId } from "mongodb";
 
+
 // Handle POST request: Save data to the database
 
 export async function POST(req) {

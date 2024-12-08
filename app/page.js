@@ -66,16 +66,15 @@ export default function Home() {
   
       //if (!response.ok) throw new Error("Failed to create AWS resources");
       const result = await response.json();
-      console.log("Response0:", result);
   
-      console.log("Received ID0:", result.ids[0]); // Debugging log
-      if (result.ids[0]) {
-        router.push(`/pages/review?id=${result.ids[0]}`);
-        //router.push(`/review?id=6754c0b8491a992e53b9c0e2`);
-      } else {
-        console.error("No ID returned from the API");
-        alert("Failed to fetch the order ID.");
-      }
+      //console.log("Received ID0:", result.ids[0]); // Debugging log
+      // if (result.ids[0]) {
+      router.push(`/pages/review?id=${result.id}`);
+      //   //router.push(`/review?id=6754c0b8491a992e53b9c0e2`);
+      // } else {
+      //   console.error("No ID returned from the API");
+      //   alert("Failed to fetch the order ID.");
+      // }
     } catch (error) {
       console.error("Submit failed:", error);
       alert("Failed to send data. Please try again.");

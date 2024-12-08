@@ -1,7 +1,10 @@
-import { connectToDatabase } from '../../../lib/mongodb';
+import { connectToDatabase } from "@/lib/mongodb";
+// import { createRecord } from "../../api/crud";
 export const runtime = "nodejs"; // Ensure server-side runtime
+import { ObjectId } from "mongodb";
 
 export async function POST(req) {
+  let id;
   try {
     const body = await req.json();
     const { bundle, plan, inputFields } = body;
@@ -17,45 +20,43 @@ export async function POST(req) {
     const db = await connectToDatabase();
 
     // Find data matching the `bundle` and `plan`
+    const filter = { 
+      "data.bundle": bundle, 
+      "data.plan": plan 
+    };
     const data = await db
       .collection('builder')
-      .find({ $and: [{ bundle: bundle }, { plan: plan }] })
+      .find(filter)
       .toArray();
 
     if (data.length === 0) {
+      console.log("Option not found");
       return new Response('Option not found', { status: 404 });
     }
 
-    let insertedIds = []; // To keep track of inserted IDs
     for (const item of data) {
       const replace = generateReplacements(item, inputFields);
       const updatedResources = replacePlaceholders(item, replace);
-
-      const order = await fetch("http://localhost:3000/api/store-data", {
+      console.log("Updated resources:", updatedResources.data);
+      const response = await fetch("http://localhost:3000/api/crud", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ resources: updatedResources }),
+        body: JSON.stringify({
+          collectionName: "yourCollectionName",
+          data: updatedResources.data },
+        ),
       });
-
-      const orderResponse = await order.json();
-      console.log(orderResponse.id);
-      if (orderResponse?.id) {
-        insertedIds.push(orderResponse.id); // Collect the inserted ID
-      }
+     // console.log("Response:", response.json());
+       const result = await response.json();
+       console.log("Result:", result.id);
+       id = result.id;
+       
     }
-
-    // Return the first ID (if relevant) or all inserted IDs
-    if (insertedIds.length > 0) {
-      return new Response(
-        JSON.stringify({ ids: insertedIds }),
-        { headers: { "Content-Type": "application/json" } }
-      );
-    } else {
-      return new Response(
-        JSON.stringify({ error: "Failed to store data" }),
-        { status: 500 }
-      );
-    }
+    return new Response(
+      JSON.stringify({ id: id }),
+      { headers: { "Content-Type": "application/json" } }
+    );
+      
   } catch (error) {
     console.error("Error in /api/builder:", error);
     return new Response(
