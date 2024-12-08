@@ -70,7 +70,7 @@ export default function Home() {
   
       console.log("Received ID0:", result.ids[0]); // Debugging log
       if (result.ids[0]) {
-        router.push(`/review?id=${result.ids[0]}`);
+        router.push(`/pages/review?id=${result.ids[0]}`);
         //router.push(`/review?id=6754c0b8491a992e53b9c0e2`);
       } else {
         console.error("No ID returned from the API");

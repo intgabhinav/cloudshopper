@@ -35,18 +35,23 @@ export default function ReviewPage() {
   }, [searchParams]);
 
   const handleSubmit = async () => {
+    const id = searchParams.get("id"); 
     setLoading(true);
     try {
       const response = await fetch("/api/orchestrator", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data), // Pass the fetched data
+        body: JSON.stringify({orderid : id}), // Pass the fetched data
       });
+      console.log("Response:", response);
 
       if (!response.ok) throw new Error("Submission failed");
 
-      alert("Data successfully submitted!");
-      router.push("/success"); // Navigate to success page
+      //alert("Data successfully submitted!");
+      const result = await response.json(); // Assuming the response contains the `id`
+      console.log("Response:", result.id);
+      //const id = result.id; // Extract the ID from the response
+      router.push(`/pages/success?id=${result.id}`);; // Navigate to success page
     } catch (error) {
       console.error("Error submitting data:", error);
       alert("Failed to submit data. Please try again.");
