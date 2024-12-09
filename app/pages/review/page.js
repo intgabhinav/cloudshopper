@@ -40,7 +40,7 @@ export default function ReviewPage() {
       const response = await fetch("/api/orchestrator", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ orderid: id }), // Pass the fetched data
+        body: JSON.stringify({ id: id }), // Pass the fetched data
       });
 
       if (!response.ok) throw new Error("Submission failed");

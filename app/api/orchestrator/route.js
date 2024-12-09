@@ -1,42 +1,33 @@
 export const runtime = "nodejs"; // Ensure server-side runtime
-import { connectToDatabase } from "../../../lib/mongodb";
 
 export async function POST(req) {
   const body = await req.json();
   console.log("Received data Orch:", body);
 
-  const {  orderid } = body;
-  console.log("Received data Orch2:", orderid);
-  // // Validate the payload
-  // if (!Array.isArray(resources) || resources.length === 0) {
-  //   console.log("Invalid request payload");
-  //   return new Response(
-  //     JSON.stringify({ error: "Invalid request payload" }),
-  //     { status: 400 }
-  //   );
-  // }
+  const {  id } = body;
+  console.log("Received data Orch2:", body.id);
 
-  // Connect to the database (if needed later)
-  const db = await connectToDatabase();
+  //const filter = JSON.stringify({ _id: id });
+  // const response = await fetch(`localhost:3000/api/crud?collectionName=yourCollectionName&filter=${encodeURIComponent(filter)}`);
+  // if (!response.ok) throw new Error("Failed to fetch data"),
+  // console.log("Received data Orch3:", response);
 
-  // try {
-  //   // Process the resources
-  //   const results = await processResources( resources.region,resources.resources);
+  try {
+    const filter = JSON.stringify({ _id: id });
+    const response = await fetch(`http://localhost:3000/api/crud?collectionName=yourCollectionName&filter=${encodeURIComponent(filter)}`);
+    if (!response.ok) throw new Error("Failed to fetch data");
+    
+    const result = await response.json();
+    const resources = result.data.data.resources;
+    console.log("Received data Orch4:", result.data.data.resources);
+    processResources(result.data.data.region, resources);
+  } catch (err) {
+    console.error("Error fetching data:", err);
+    //setError(err.message || "An unexpected error occurred");
+  }
 
-  //   return new Response(JSON.stringify(results), {
-  //     headers: { "Content-Type": "application/json" },
-  //     status: 200,
-  //   });
-  // } catch (error) {
-  //   console.error("Error in processing resources:", error.message);
-
-  //   return new Response(
-  //     JSON.stringify({ error: "Failed to process resources", details: error.message }),
-  //     { status: 500 }
-  //   );
-  // }
   return new Response(
-    JSON.stringify({ message: "All resources created successfully" , "id" : orderid }),
+    JSON.stringify({ message: "All resources created successfully" , "id" : id }),
     { status: 201 }
   )
 }
