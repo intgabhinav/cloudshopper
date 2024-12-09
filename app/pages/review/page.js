@@ -19,7 +19,7 @@ export default function ReviewPage() {
 
       try {
         const filter = JSON.stringify({ _id: id });
-        const response = await fetch(`/api/crud?collectionName=yourCollectionName&filter=${encodeURIComponent(filter)}`);
+        const response = await fetch(`/api/crud?collectionName=orders&filter=${encodeURIComponent(filter)}`);
         if (!response.ok) throw new Error("Failed to fetch data");
 
         const result = await response.json();
