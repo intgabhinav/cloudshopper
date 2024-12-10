@@ -6,7 +6,7 @@ export const runtime = "nodejs"; // Ensure server-side runtime
 export async function POST(req) {
   try {
     const body = await req.json();
-    console.log("Received data:", body.data);
+    console.log("Received data CRUD POST:", body.data);
     const result = await createRecord(body.collectionName, body.data);
 
     return new Response(

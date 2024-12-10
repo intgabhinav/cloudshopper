@@ -8,7 +8,6 @@ export async function POST(req) {
   try {
     const body = await req.json();
     const { bundle, plan, inputFields } = body;
-
     // Validate the payload
     if (!bundle || !plan || !inputFields) {
       return new Response(
@@ -33,22 +32,27 @@ export async function POST(req) {
       console.log("Option not found");
       return new Response('Option not found', { status: 404 });
     }
-
+    
     for (const item of data) {
-      const replace = generateReplacements(item, inputFields);
-      const updatedResources = replacePlaceholders(item, replace);
-      console.log("Updated resources:", updatedResources.data);
+      //const replace = generateReplacements(item, inputFields);
+      replacePlaceholders(item, inputFields);
       const response = await fetch("http://localhost:3000/api/crud", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           collectionName: "orders",
-          data: updatedResources.data },
+          data :{
+            bundle : item.data.bundle, 
+            plan : item.data.plan,
+            region : item.data.region, 
+            resources : item.data.resources,
+            inputFields: inputFields,
+            status : "Review" },
+        
+        },
         ),
       });
-     // console.log("Response:", response.json());
        const result = await response.json();
-       console.log("Result:", result.id);
        id = result.id;
        
     }
