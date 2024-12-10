@@ -28,32 +28,48 @@ export async function POST(req) {
 }
 
 // Function to process multiple resources
-async function processResources(region, resources) {
+async function processResources(orderID, region, resource) {
   const results = [];
-console.log( "Preocess: ",region, resources);
+console.log( "Preocess: ",region, resource.inputs);
 
-   try {
-  const response = await fetch(`http://localhost:3000${resources.api}`, {
+const inputs = resource.inputs || {};
+
+const response = await fetch("http://localhost:3000/api/crud", {
   method: "POST",
   headers: { "Content-Type": "application/json" },
   body: JSON.stringify({
-  region,
-  ...(resources.inputs || {}), // Pass additional data if provided
-  }),
+    collectionName: "jobs",
+    data: {
+      orderID:orderID,
+      name: resource.command,
+      type : resource.type,
+     inputs
+    }
+ }
+  ),
+});
+
+  //  try {
+  // const response = await fetch(`http://localhost:3000${resource.api}`, {
+  // method: "POST",
+  // headers: { "Content-Type": "application/json" },
+  // body: JSON.stringify({
+  // region,
+  // ...(resource.inputs || {}), // Pass additional data if provided
+  // }),
     
-  });
+  // });
 
-  if (!response.ok) {
-  throw new Error(`Failed to fetch ${item.api}: ${response.statusText}`);
-  }
-
-  const responseData = await response.json();
-  results.push({ name: resources.name, data: responseData });
-  } catch (error) {
-  console.error(`Error processing resource ${resources.name}:`, error.message);
-  results.push({ name: resources.name, error: error.message });
-  }
-  }
+  // if (!response.ok) {
+  // throw new Error(`Failed to fetch ${item.api}: ${response.statusText}`);
+  // }
+  // const responseData = await response.json();
+  // results.push({ name: resource.name, data: responseData });
+  // } catch (error) {
+  // console.error(`Error processing resource ${resource.name}:`, error.message);
+  // results.push({ name: resource.name, error: error.message });
+  // }
+  // }
 
  
-
+}
