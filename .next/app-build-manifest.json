@@ -20,6 +20,21 @@
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
       "static/chunks/app/api/crud/route.js"
+    ],
+    "/api/resource/route": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/api/resource/route.js"
+    ],
+    "/api/orchestrator/route": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/api/orchestrator/route.js"
+    ],
+    "/api/aws/ec2/create-vpc/route": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/api/aws/ec2/create-vpc/route.js"
     ]
   }
 }

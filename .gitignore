@@ -1,3 +1,12 @@
 package-lock.json
 node_modules
 .next
+.next/app-build-manifest.json
+.next/trace
+.next/cache/webpack/server-development/0.pack.gz
+.next/cache/webpack/server-development/1.pack.gz
+.next/cache/webpack/server-development/index.pack.gz
+.next/cache/webpack/server-development/index.pack.gz.old
+.next/server/app-paths-manifest.json
+.next/server/webpack-runtime.js
+.next/static/chunks/webpack.js
