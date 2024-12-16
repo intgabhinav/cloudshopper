@@ -1,0 +1,78 @@
+.container {
+  padding: 20px;
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.firstSet,
+.secondSet {
+  display: flex;
+  justify-content: space-evenly;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+
+.box {
+  width: 200px;
+  height: 250px;
+  background-color: #fff;
+  border: 2px solid #ccc;
+  border-radius: 10px;
+  text-align: center;
+  padding: 10px;
+  position: relative;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.box img {
+  width: 80%;
+  border-radius: 5px;
+}
+
+.radioContainer {
+  position: absolute;
+  bottom: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.radioInput {
+  margin-right: 5px;
+}
+
+.inputFields {
+  margin-top: 20px;
+}
+
+.inputFieldContainer {
+  margin-bottom: 10px;
+}
+
+.inputLabel {
+  display: block;
+  margin-bottom: 5px;
+}
+
+.inputField {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+.submitButtonContainer {
+  margin-top: 20px;
+  text-align: center;
+}
+
+.submitButton {
+  padding: 10px 20px;
+  background-color: #007bff;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
