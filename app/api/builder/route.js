@@ -14,12 +14,12 @@ export async function POST(req) {
     if (!responseOrder.ok) throw new Error("Failed to fetch order data");
 
     const resultOrder = await responseOrder.json();
-    const orderData = resultOrder.data.data;
+    const dataOrder = resultOrder.data.data;
 
-    console.log("Fetched Order Data:", orderData);
+    console.log("Fetched Order Data:", dataOrder);
 
     // 2. Iterate over Resources
-    for (const resource of orderData.resources) {
+    for (const resource of dataOrder.resources) {
       console.log(`Processing resource: ${resource.name} (${resource.type})`);
 
       // Fetch Resource Template from Resources Collection
@@ -36,33 +36,49 @@ export async function POST(req) {
 
       // 3. Fetch Parent Data if Parent Exists
       let parentData = {};
+      let start = 0;
       if (Array.isArray(processedTemplate.parent)) {
-        for (const parent of processedTemplate.parent) {
-          const parentKey = Object.keys(parent)[0]; // e.g., "vpc"
-          const parentType = parent[parentKey]; // e.g., "AWS::EC2::VPC"
-
-          console.log(`Fetching parent ${parentKey} of type ${parentType}`);
-
-          const parentFilter = JSON.stringify({
-            "data.orderID": id,
-            "data.name": parentKey
+        const parentPromises = processedTemplate.parent.map(async (parentObject) => {
+          // Loop through all keys in the parent object
+          const parentFetches = Object.keys(parentObject).map(async (parentKey) => {
+            console.log("Fetching data for parent:", parentKey);
+      
+            try {
+              const parentFilter = JSON.stringify({
+                "data.orderID": id,
+                "data.name": parentKey
+              });
+      
+              const responseParent = await fetch(
+                `http://localhost:3000/api/crud?collectionName=jobs&filter=${encodeURIComponent(parentFilter)}`
+              );
+      
+              if (!responseParent.ok) {
+                throw new Error(`Failed to fetch parent data for ${parentKey}`);
+              }
+      
+              const resultParent = await responseParent.json();
+              console.log(`Fetched Parent Data (${parentKey}):`, resultParent);
+      
+              // Store parent data for placeholder replacement
+              parentData[parentKey] = resultParent.data;
+            } catch (error) {
+              console.error(`Error fetching data for parent ${parentKey}:`, error);
+            }
           });
-
-          const responseParent = await fetch(
-            `http://localhost:3000/api/crud?collectionName=jobs&filter=${encodeURIComponent(parentFilter)}`
-          );
-          if (!responseParent.ok) throw new Error(`Failed to fetch parent data for ${parentKey}`);
-
-          const parentResult = await responseParent.json();
-          parentData[parentKey] = parentResult.data;
-          console.log(`Fetched Parent Data (${parentKey}):`, parentData[parentKey]);
-        }
+      
+          // Await all fetches for this parent object
+          await Promise.all(parentFetches);
+        });
+      
+        await Promise.all(parentPromises);
       }
+      
 
       // 4. Replace Placeholders in Inputs
       processedTemplate.inputs = replacePlaceholders(
         processedTemplate.inputs,
-        orderData.inputFields,
+        dataOrder.inputFields,
         parentData
       );
 
