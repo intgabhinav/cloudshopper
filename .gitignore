@@ -40,3 +40,25 @@ yarn-error.log*
 next-env.d.ts
 export async function POST(req) {.ts
 import { EC2Client, CreateVpcCommand } f.ts
+.next/static/chunks/app/pages/review/page.js
+.next/static/chunks/app/layout.js
+.next/static/chunks/webpack.js
+.next/server/vendor-chunks/next.js
+.next/server/app/pages/success/page_client-reference-manifest.js
+.next/server/app/pages/review/page.js
+.next/server/app/pages/review/page_client-reference-manifest.js
+.next/server/app/api/crud/route_client-reference-manifest.js
+.next/server/webpack-runtime.js
+.next/server/app-paths-manifest.json
+.next/cache/webpack/server-development/index.pack.gz.old
+.next/cache/webpack/server-development/index.pack.gz
+.next/cache/webpack/server-development/3.pack.gz
+.next/cache/webpack/server-development/2.pack.gz
+.next/cache/webpack/server-development/1.pack.gz
+.next/cache/webpack/server-development/0.pack.gz
+.next/cache/webpack/client-development/index.pack.gz.old
+.next/cache/webpack/client-development/index.pack.gz
+.next/cache/webpack/client-development/2.pack.gz
+.next/cache/webpack/client-development/1.pack.gz
+.next/trace
+.next/app-build-manifest.json
