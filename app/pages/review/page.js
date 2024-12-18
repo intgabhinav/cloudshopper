@@ -37,7 +37,7 @@ export default function ReviewPage() {
     const id = searchParams.get("id");
     setLoading(true);
     try {
-      const response = await fetch("/api/builder", {
+      const response = await fetch("/api/orchestrator", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id: id }), // Pass the fetched data

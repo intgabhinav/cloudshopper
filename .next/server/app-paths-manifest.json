@@ -1,7 +1,8 @@
 {
+  "/api/options/[option]/route": "app/api/options/[option]/route.js",
+  "/api/orderbuilder/route": "app/api/orderbuilder/route.js",
   "/api/crud/route": "app/api/crud/route.js",
-  "/api/builder/route": "app/api/builder/route.js",
-  "/pages/review/page": "app/pages/review/page.js",
   "/pages/success/page": "app/pages/success/page.js",
-  "/page": "app/page.js"
+  "/page": "app/page.js",
+  "/pages/review/page": "app/pages/review/page.js"
 }

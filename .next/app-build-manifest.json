@@ -1,10 +1,35 @@
 {
   "pages": {
+    "/api/builder/route": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/api/builder/route.js"
+    ],
+    "/api/crud/route": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/api/crud/route.js"
+    ],
+    "/api/orchestrator/route": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/api/orchestrator/route.js"
+    ],
     "/layout": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
       "static/css/app/layout.css",
       "static/chunks/app/layout.js"
+    ],
+    "/pages/success/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/pages/success/page.js"
+    ],
+    "/pages/review/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/pages/review/page.js"
     ],
     "/page": [
       "static/chunks/webpack.js",
@@ -16,30 +41,10 @@
       "static/chunks/main-app.js",
       "static/chunks/app/api/options/[option]/route.js"
     ],
-    "/api/order/route": [
+    "/api/orderbuilder/route": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/chunks/app/api/order/route.js"
-    ],
-    "/api/crud/route": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/api/crud/route.js"
-    ],
-    "/pages/review/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/pages/review/page.js"
-    ],
-    "/api/builder/route": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/api/builder/route.js"
-    ],
-    "/pages/success/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/pages/success/page.js"
+      "static/chunks/app/api/orderbuilder/route.js"
     ]
   }
 }

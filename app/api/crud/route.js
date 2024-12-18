@@ -1,4 +1,9 @@
-import { createRecord, readRecord, updateRecord, deleteRecord } from "@/lib/crud";
+import {
+  createRecord,
+  readRecord,
+  updateRecord,
+  deleteRecord,
+} from "@/lib/crud";
 
 export const runtime = "nodejs"; // Ensure server-side runtime
 
@@ -6,8 +11,15 @@ export const runtime = "nodejs"; // Ensure server-side runtime
 export async function POST(req) {
   try {
     const body = await req.json();
-    //console.log("Received data CRUD POST:", body.data);
-    const result = await createRecord(body.collectionName, body.data);
+    const { collectionName, ...data } = body;
+
+    console.log("Received POST request:", body);
+    const timestamps = {
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+
+    const result = await createRecord(collectionName, { ...data, ...timestamps });
 
     return new Response(
       JSON.stringify({ success: true, id: result.id }),
@@ -21,9 +33,12 @@ export async function POST(req) {
     );
   }
 }
+// Other methods (GET, PUT, DELETE) remain generic and reusable as written before.
+
 
 // Handle GET requests for reading records
 export async function GET(req) {
+
   try {
     const { searchParams } = new URL(req.url);
     const collectionName = searchParams.get("collectionName");
@@ -57,16 +72,18 @@ export async function PUT(req) {
     const body = await req.json();
     console.log("Received PUT request:", body);
 
-    if (!body.collectionName || !body.filter || !body.data) {
-      throw new Error("Invalid request: Missing required fields");
-    }
+    // if (!body.collectionName || !body.filter || !body.data) {
+    //   throw new Error("Invalid request: Missing required fields");
+    // }
 
     // Ensure filter is an object
-    if (typeof body.filter === "string") {
-      body.filter = JSON.parse(body.filter);
-    }
-
-    const result = await updateRecord(body.collectionName, body.filter, body.data);
+    // if (typeof body.filter === "string") {
+    //   body.filter = JSON.parse(body.filter);
+    // }
+    const { collectionName, filter, ...updateData } = body;
+    const timestamps = { updatedAt: new Date().toISOString() };
+    const result = await updateRecord(collectionName, filter, { ...updateData, ...timestamps });
+    
 
     return new Response(
       JSON.stringify({

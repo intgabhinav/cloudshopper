@@ -36,44 +36,40 @@ export async function POST(req) {
 
       // 3. Fetch Parent Data if Parent Exists
       let parentData = {};
-      let start = 0;
       if (Array.isArray(processedTemplate.parent)) {
         const parentPromises = processedTemplate.parent.map(async (parentObject) => {
-          // Loop through all keys in the parent object
           const parentFetches = Object.keys(parentObject).map(async (parentKey) => {
             console.log("Fetching data for parent:", parentKey);
-      
+
             try {
               const parentFilter = JSON.stringify({
                 "data.orderID": id,
-                "data.name": parentKey
+                "data.name": parentKey,
               });
-      
+
               const responseParent = await fetch(
                 `http://localhost:3000/api/crud?collectionName=jobs&filter=${encodeURIComponent(parentFilter)}`
               );
-      
+
               if (!responseParent.ok) {
                 throw new Error(`Failed to fetch parent data for ${parentKey}`);
               }
-      
+
               const resultParent = await responseParent.json();
               console.log(`Fetched Parent Data (${parentKey}):`, resultParent);
-      
+
               // Store parent data for placeholder replacement
               parentData[parentKey] = resultParent.data;
             } catch (error) {
               console.error(`Error fetching data for parent ${parentKey}:`, error);
             }
           });
-      
-          // Await all fetches for this parent object
+
           await Promise.all(parentFetches);
         });
-      
+
         await Promise.all(parentPromises);
       }
-      
 
       // 4. Replace Placeholders in Inputs
       processedTemplate.inputs = replacePlaceholders(
@@ -82,21 +78,44 @@ export async function POST(req) {
         parentData
       );
 
-      console.log(`Processed Inputs for ${resource.name}:`, processedTemplate.inputs);
+      console.log(`Processed Inputs for ${resource.name}:`, processedTemplate);
 
-      // At this point, you can send the final processed inputs to the respective API
-      // Example: await callResourceAPI(processedTemplate.api, processedTemplate.inputs);
+      // 5. Send Data to the Next API
+      const apiResponse = await fetch(`http://localhost:3000/api/orchestrator`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          id,
+          region: dataOrder.region,
+          name: resource.name,
+          api: processedTemplate.api,
+          processedTemplate,
+        }),
+      });
+
+      if (!apiResponse.ok) {
+        throw new Error(
+          `Failed to process resource ${resource.name}: ${apiResponse.statusText}`
+        );
+      }
+
+      const apiResult = await apiResponse.json();
+      console.log(`API Response for ${resource.name}:`, apiResult);
     }
   } catch (err) {
     console.error("Error processing order:", err);
+    return new Response(
+      JSON.stringify({ success: false, error: err.message }),
+      { status: 500, headers: { "Content-Type": "application/json" } }
+    );
   }
 
   return new Response(
     JSON.stringify({
       message: `Your Order with ID ${id} is submitted`,
-      id: id
+      id: id,
     }),
-    { status: 201 }
+    { status: 201, headers: { "Content-Type": "application/json" } }
   );
 }
 
@@ -118,7 +137,7 @@ function replacePlaceholders(inputs, inputFields, parentData) {
         else if (obj[key].includes(".")) {
           const [parentKey, parentField] = obj[key].split(".");
           console.log("Parent Key:", parentKey, "Parent Field:", parentField);
-        
+
           // Always look in the outputs block
           if (
             parentData[parentKey] &&
@@ -126,12 +145,13 @@ function replacePlaceholders(inputs, inputFields, parentData) {
             parentData[parentKey].outputs[parentField] !== undefined
           ) {
             obj[key] = parentData[parentKey].outputs[parentField];
-            console.log(`Replaced with parent outputs value: ${parentKey}.outputs.${parentField} -> ${obj[key]}`);
+            console.log(
+              `Replaced with parent outputs value: ${parentKey}.outputs.${parentField} -> ${obj[key]}`
+            );
           } else {
             console.warn(`Parent placeholder not found: ${parentKey}.outputs.${parentField}`);
           }
         }
-        
       }
     }
   };
