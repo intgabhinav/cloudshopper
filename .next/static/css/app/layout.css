@@ -521,6 +521,9 @@ video {
 [hidden]:where(:not([hidden="until-found"])) {
   display: none;
 }
+.static {
+  position: static;
+}
 .mx-auto {
   margin-left: auto;
   margin-right: auto;

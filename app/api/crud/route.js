@@ -54,7 +54,7 @@ export async function GET(req) {
     }
 
     return new Response(
-      JSON.stringify({  data: result }),
+      JSON.stringify(result),
       { headers: { "Content-Type": "application/json" }, status: 200 }
     );
   } catch (error) {

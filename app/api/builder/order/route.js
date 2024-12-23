@@ -44,12 +44,13 @@ export async function POST(req) {
           plan: item.data.plan,
           region: item.data.region,
           resources: item.data.resources,
-          inputFields: {
-            region: inputFields.region,
-            sitename: inputFields.sitename,
-            username: inputFields.username,
-            passwordHash: hashPassword(inputFields.password), // Use a hashing function
-          },
+          inputFields,
+          // : {
+          //   region: inputFields.region,
+          //   sitename: inputFields.sitename,
+          //   username: inputFields.username,
+          //   passwordHash: hashPassword(inputFields.password), // Use a hashing function
+          // },
           status: "Review",
         }),
       });

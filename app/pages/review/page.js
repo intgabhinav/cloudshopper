@@ -23,7 +23,7 @@ export default function ReviewPage() {
         if (!response.ok) throw new Error("Failed to fetch data");
 
         const result = await response.json();
-        setData(result.data);
+        setData(result);
       } catch (err) {
         console.error("Error fetching data:", err);
         setError(err.message || "An unexpected error occurred");
@@ -40,7 +40,7 @@ export default function ReviewPage() {
       const response = await fetch("/api/orchestrator", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id: id }), // Pass the fetched data
+        body: JSON.stringify({ orderID: id }), // Pass the fetched data
       });
 
       if (!response.ok) throw new Error("Submission failed");

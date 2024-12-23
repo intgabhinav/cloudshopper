@@ -1,19 +1,14 @@
 {
   "pages": {
-    "/api/builder/route": [
+    "/api/orchestrator/route": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/chunks/app/api/builder/route.js"
+      "static/chunks/app/api/orchestrator/route.js"
     ],
     "/api/crud/route": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
       "static/chunks/app/api/crud/route.js"
-    ],
-    "/api/orchestrator/route": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/api/orchestrator/route.js"
     ],
     "/layout": [
       "static/chunks/webpack.js",
@@ -30,21 +25,6 @@
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
       "static/chunks/app/pages/review/page.js"
-    ],
-    "/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/page.js"
-    ],
-    "/api/options/[option]/route": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/api/options/[option]/route.js"
-    ],
-    "/api/orderbuilder/route": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/api/orderbuilder/route.js"
     ]
   }
 }

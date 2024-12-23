@@ -1,79 +1,127 @@
-export const runtime = "nodejs";
+export const runtime = "nodejs"; // Ensure server-side runtime
 
 export async function POST(req) {
   const body = await req.json();
-  const { id } = body; // Order ID
-  console.log("Received Order ID:", id);
+  const { orderID } = body;
+  console.log("01 Received data:", orderID, body);
 
-try{
-      // 1. Fetch the Order by ID
-      const filter = JSON.stringify({ _id: id });
-      const responseOrder = await fetch(
-        `http://localhost:3000/api/crud?collectionName=orders&filter=${encodeURIComponent(filter)}`
+  try {
+    // Fetch the order details using the orderID
+    const filter = JSON.stringify({ _id: orderID });
+    const responseOrder = await fetch(
+      `http://localhost:3000/api/crud?collectionName=orders&filter=${encodeURIComponent(filter)}`
+    );
+    if (!responseOrder.ok) throw new Error("Failed to fetch order data");
+
+    const resultOrder = await responseOrder.json();
+    const { resources } = resultOrder;
+    console.log("02 Fetched order details:", resultOrder);
+
+    for (const resource of resources) {
+      console.log(
+        `03 Processing resource: ${resource.name} (${resource.type}), resultOrder:`,
+        resources
       );
-      if (!responseOrder.ok) throw new Error("Failed to fetch order data");
-  
-      const resultOrder = await responseOrder.json();
-      const dataOrder = resultOrder.data.data;
-  
-      console.log("Fetched Order Data:", resultOrder);
 
-}catch(err){
-  console.error("Error handling POST request:", err);
-  return new Response(
-    JSON.stringify({ success: false, error: err.message }),
-    { headers: { "Content-Type": "application/json" }, status: 500 }
-  );
+      // Process parent relationships
+      if (resource.parent && Array.isArray(resource.parent)) {
+        console.log(
+          `04 Processing multiple parents for resource ${resource.name}, parent:`,
+          resource.parent
+        );
+        for (const parent of resource.parent) {
+          console.log(`05 Processing parent: ${parent}`);
+          // Fetch parent details using the parent name
+          const filterJob = JSON.stringify({
+            "data.orderID": orderID,
+            "data.name": parent,
+          });
+          const responseParent = await fetch(
+            `http://localhost:3000/api/crud?collectionName=jobs&filter=${encodeURIComponent(filterJob)}`
+          );
+          if (!responseParent.ok) throw new Error("Failed to fetch parent data");
+          const resultParent = await responseParent.json();
+          console.log("Fetched parent details response:", JSON.stringify(resultParent, null, 2));
+          // Extract parent details
+          const parentDetails = resultParent?.data;
+
+          if (!parentDetails) {
+            console.error("Parent details not found or invalid structure:", resultParent);
+            continue; // Skip this parent if no details are found
+          }
+
+          console.log("Resolved parent details:", JSON.stringify(parentDetails, null, 2));
+
+          console.log("06 Fetched parent details:", resultParent, parentDetails);
+
+          // Fetch the resource template
+          const filterResource = JSON.stringify({ type: resource.type });
+          const responseResource = await fetch(
+            `http://localhost:3000/api/crud?collectionName=resources&filter=${encodeURIComponent(filterResource)}`
+          );
+          if (!responseResource.ok) throw new Error("Failed to fetch resource template");
+
+          const resourceTemplate = await responseResource.json();
+          console.log("07 Fetched resource template:", resourceTemplate);
+
+//Resolve Inouts
+          const resolvedInputs = {};
+          for (const [key, value] of Object.entries(resourceTemplate.inputs)) {
+            if (typeof value === "string" && value.startsWith("{{") && value.endsWith("}}")) {
+              const placeholder = value.slice(2, -2); // Remove {{ and }}
+              const [parentType, ...pathParts] = placeholder.split(".");
+              let resolvedValue;
+          
+              // Match the parent type
+              if (parentDetails?.type === parentType) {
+                resolvedValue = parentDetails;
+                for (const path of pathParts) {
+                  resolvedValue = resolvedValue?.[path];
+                }
+              }
+          
+              if (resolvedValue === undefined) {
+                console.error(`Failed to resolve placeholder ${value} for resource ${resource.name}`);
+              }
+              resolvedInputs[key] = resolvedValue;
+            } else {
+              resolvedInputs[key] = value;
+            }
+          }
+          
+          console.log(`Resolved inputs for resource ${resource.name}:`, resolvedInputs);
+
+// Example: Using resolved inputs to call a resource API
+try {
+  const resourceResponse = await fetch(resourceTemplate.api, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(resolvedInputs),
+  });
+  if (!resourceResponse.ok) {
+    console.error(`Failed to create resource ${resource.name}:`, await resourceResponse.text());
+  } else {
+    console.log(`Resource ${resource.name} created successfully.`);
+  }
+} catch (apiError) {
+  console.error(`Error creating resource ${resource.name}:`, apiError);
 }
 
 
-
-  return new Response(
-    JSON.stringify({
-      message: `Your Order with ID ${id} is submitted`,
-      id: id,
-    }),
-    { status: 201, headers: { "Content-Type": "application/json" } }
-  );
-}
-
-// Helper Function to Replace Placeholders in Inputs
-function replacePlaceholders(inputs, inputFields, parentData) {
-  const replaceValues = (obj) => {
-    for (let key in obj) {
-      if (typeof obj[key] === "object") {
-        replaceValues(obj[key]); // Recursively process nested objects
-      } else if (typeof obj[key] === "string") {
-        // Replace inputFields placeholders
-        if (obj[key].startsWith("inputFields.")) {
-          const fieldName = obj[key].replace("inputFields.", "");
-          if (inputFields[fieldName] !== undefined) {
-            obj[key] = inputFields[fieldName];
-          }
-        }
-        // Replace parent placeholders like "vpc.VpcId"
-        else if (obj[key].includes(".")) {
-          const [parentKey, parentField] = obj[key].split(".");
-          console.log("Parent Key:", parentKey, "Parent Field:", parentField);
-
-          // Always look in the outputs block
-          if (
-            parentData[parentKey] &&
-            parentData[parentKey].outputs &&
-            parentData[parentKey].outputs[parentField] !== undefined
-          ) {
-            obj[key] = parentData[parentKey].outputs[parentField];
-            console.log(
-              `Replaced with parent outputs value: ${parentKey}.outputs.${parentField} -> ${obj[key]}`
-            );
-          } else {
-            console.warn(`Parent placeholder not found: ${parentKey}.outputs.${parentField}`);
-          }
         }
       }
     }
-  };
+  } catch (err) {
+    console.error(err);
+    return new Response(
+      JSON.stringify({ success: false, error: err.message }),
+      { headers: { "Content-Type": "application/json" }, status: 500 }
+    );
+  }
 
-  replaceValues(inputs);
-  return inputs;
+  console.log("09 Processing completed");
+  return new Response(
+    JSON.stringify({ success: true, message: "All resources processed successfully" }),
+    { headers: { "Content-Type": "application/json" }, status: 200 }
+  );
 }
