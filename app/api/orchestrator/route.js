@@ -1,5 +1,17 @@
 export const runtime = "nodejs"; // Ensure server-side runtime
 
+function resolvePlaceholder(placeholder, parentDetails) {
+  const [parentType, ...pathParts] = placeholder.split(".");
+  if (parentDetails?.type === parentType) {
+    let resolvedValue = parentDetails;
+    for (const path of pathParts) {
+      resolvedValue = resolvedValue?.[path];
+    }
+    return resolvedValue;
+  }
+  return undefined;
+}
+
 export async function POST(req) {
   const body = await req.json();
   const { orderID } = body;
@@ -33,26 +45,20 @@ export async function POST(req) {
           console.log(`05 Processing parent: ${parent}`);
           // Fetch parent details using the parent name
           const filterJob = JSON.stringify({
-            "data.orderID": orderID,
-            "data.name": parent,
+            "orderID": orderID,
+            "name": parent,
           });
           const responseParent = await fetch(
             `http://localhost:3000/api/crud?collectionName=jobs&filter=${encodeURIComponent(filterJob)}`
           );
           if (!responseParent.ok) throw new Error("Failed to fetch parent data");
           const resultParent = await responseParent.json();
-          console.log("Fetched parent details response:", JSON.stringify(resultParent, null, 2));
-          // Extract parent details
-          const parentDetails = resultParent?.data;
+          const parentDetails = resultParent;
 
-          if (!parentDetails) {
+          if (!resultParent) {
             console.error("Parent details not found or invalid structure:", resultParent);
             continue; // Skip this parent if no details are found
           }
-
-          console.log("Resolved parent details:", JSON.stringify(parentDetails, null, 2));
-
-          console.log("06 Fetched parent details:", resultParent, parentDetails);
 
           // Fetch the resource template
           const filterResource = JSON.stringify({ type: resource.type });
@@ -64,50 +70,41 @@ export async function POST(req) {
           const resourceTemplate = await responseResource.json();
           console.log("07 Fetched resource template:", resourceTemplate);
 
-//Resolve Inouts
           const resolvedInputs = {};
           for (const [key, value] of Object.entries(resourceTemplate.inputs)) {
             if (typeof value === "string" && value.startsWith("{{") && value.endsWith("}}")) {
               const placeholder = value.slice(2, -2); // Remove {{ and }}
-              const [parentType, ...pathParts] = placeholder.split(".");
-              let resolvedValue;
-          
-              // Match the parent type
-              if (parentDetails?.type === parentType) {
-                resolvedValue = parentDetails;
-                for (const path of pathParts) {
-                  resolvedValue = resolvedValue?.[path];
-                }
-              }
-          
+              const resolvedValue = resolvePlaceholder(placeholder, parentDetails);
+
               if (resolvedValue === undefined) {
-                console.error(`Failed to resolve placeholder ${value} for resource ${resource.name}`);
+                console.error(
+                  `Failed to resolve placeholder ${value} for resource ${resource.name}. Parent details:`,
+                  JSON.stringify(parentDetails, null, 2)
+                );
               }
               resolvedInputs[key] = resolvedValue;
             } else {
               resolvedInputs[key] = value;
             }
           }
-          
+
           console.log(`Resolved inputs for resource ${resource.name}:`, resolvedInputs);
 
-// Example: Using resolved inputs to call a resource API
-try {
-  const resourceResponse = await fetch(resourceTemplate.api, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(resolvedInputs),
-  });
-  if (!resourceResponse.ok) {
-    console.error(`Failed to create resource ${resource.name}:`, await resourceResponse.text());
-  } else {
-    console.log(`Resource ${resource.name} created successfully.`);
-  }
-} catch (apiError) {
-  console.error(`Error creating resource ${resource.name}:`, apiError);
-}
-
-
+          // Example: Using resolved inputs to call a resource API
+          // try {
+          //   const resourceResponse = await fetch(resourceTemplate.api, {
+          //     method: "POST",
+          //     headers: { "Content-Type": "application/json" },
+          //     body: JSON.stringify(resolvedInputs),
+          //   });
+          //   if (!resourceResponse.ok) {
+          //     console.error(`Failed to create resource ${resource.name}:`, await resourceResponse.text());
+          //   } else {
+          //     console.log(`Resource ${resource.name} created successfully.`);
+          //   }
+          // } catch (apiError) {
+          //   console.error(`Error creating resource ${resource.name}:`, apiError);
+          // }
         }
       }
     }
