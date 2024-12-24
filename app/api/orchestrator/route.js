@@ -3,137 +3,92 @@ export const runtime = "nodejs"; // Ensure server-side runtime
 export async function POST(req) {
   try {
     const body = await req.json();
+    const { orderID } = body;
+    console.log("Orchestrator started with Order ID:", orderID);
 
-    const { id, region, resource } = body;
-    //console.log("Received data:", id, region, resource);
+    // Step 1: Fetch order details
+    const orderResponse = await fetch(`http://localhost:3000/api/orders?orderID=${orderID}`);
+    if (!orderResponse.ok) throw new Error("Failed to fetch order details");
+    const { order } = await orderResponse.json();
+    console.log("Fetched order details:", order);
 
-    // Step 1: Create Job
-    const resultCreateJob = await createJob(id, region, resource.data);
+    // Step 2: Process resources
+    for (const resource of order.resources) {
+      if (resource.parent && Array.isArray(resource.parent)) {
+        const parentDetailsArray = [];
 
-    if (!resultCreateJob.success) {
-      return new Response(
-        JSON.stringify({ success: false, error: resultCreateJob.error }),
-        { headers: { "Content-Type": "application/json" }, status: 500 }
-      );
-    }
-    // Step 2: Process Resource
-    const resultProcessResource = await processResource(id, region, resource.data);
+        // Fetch details for all parents of the resource
+        for (const parent of resource.parent) {
+          const responseParent = await fetch("http://localhost:3000/api/parents", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ orderID, parentName: parent }),
+          });
 
-    if (!resultProcessResource.success) {
-      return new Response(
-        JSON.stringify({ success: false, error: resultProcessResource.error }),
-        { headers: { "Content-Type": "application/json" }, status: 500 }
-      );
-    }
+          if (!responseParent.ok) {
+            console.error(`Failed to fetch parent: ${parent}`);
+            continue;
+          }
 
-    const resultUpdateJob = await updateJob(resultCreateJob.id, {
-      status: "completed",
-      outputs: resultProcessResource.results[0].data,     
-    });        
+          const { parentDetails } = await responseParent.json();
+          console.log(`Fetched parent details for ${parent}:`, parentDetails);
+          if (parentDetails) parentDetailsArray.push({ name: parent, details: parentDetails });
+        }
 
-    console.log("resultUpdateJob: ", resultUpdateJob);
+        console.log(`Resolved parents for resource ${resource.name}:`, parentDetailsArray);
 
-    if (!resultUpdateJob.success) {
-      return new Response(
-        JSON.stringify({ success: false, error: resultUpdateJob.error }),
-        { headers: { "Content-Type": "application/json" }, status: 500 }
-      );
-    }
+        // Step 3: Fetch resource template
+        const filter = JSON.stringify({ type: resource.type });
+        const resourceTemplateResponse = await fetch(
+          `http://localhost:3000/api/crud?collectionName=resources&filter=${encodeURIComponent(filter)}`
+        );
+        const resourceTemplate = await resourceTemplateResponse.json();
+        console.log(`Fetched resource template for resource ${resource.name}:`, resourceTemplate);
 
-    return new Response(
-      JSON.stringify({ message: "All resources created successfully", resultProcessResource, id }),
-      { status: 201 }
-    );
-  } catch (error) {
-    console.error("Error in POST handler:", error);
-    return new Response(
-      JSON.stringify({ success: false, error: "Internal Server Error" }),
-      { headers: { "Content-Type": "application/json" }, status: 500 }
-    );
-  }
-}
+        // Step 4: Resolve placeholders
+        const placeholderResponse = await fetch("http://localhost:3000/api/placeholders", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ template: resourceTemplate, parentDetailsArray, inputFields: order.inputFields }),
+        });
+        const { resolvedInputs } = await placeholderResponse.json();
+        console.log(`Resolved inputs for resource ${resource.name}:`, resolvedInputs);
 
-// Function to create a job
-async function createJob(orderID, region, resource) {
-  try {
-    const inputs = resource.inputs || {};
-
-    const response = await fetch("http://localhost:3000/api/crud", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        collectionName: "jobs",
-        data: {
+        // Step 5: Send job creation request to the CRUD API
+        const jobData = {
           orderID,
-          region,
-          name: resource.command,
+          region: order.region,
+          name: resource.name,
           type: resource.type,
+          api: resourceTemplate.api,
+          inputs: resolvedInputs,
           status: "created",
-          inputs,
-        },
-      }),
-    });
+        };
 
-    return response.json();
-  } catch (error) {
-    console.error("Error in createJob:", error);
-    return { success: false, error: error.message };
-  }
-}
+        const jobCreationResponse = await fetch("http://localhost:3000/api/jobs", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(jobData),
+        });
 
-// Function to process a resource
-async function processResource(id, region, resource) {
-  const results = [];
-
-  try {
-    const response = await fetch(`http://localhost:3000${resource.api}`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        id,
-        region,
-        ...(resource.inputs || {}), // Pass additional data if provided
-      }),
-    });
-
-    if (!response.ok) {
-      throw new Error(`Failed to fetch ${resource.api}: ${response.statusText}`);
+        if (!jobCreationResponse.ok) {
+          console.error(`Failed to create job for resource ${resource.name}:`, await jobCreationResponse.text());
+        } else {
+          const { id } = await jobCreationResponse.json();
+          console.log(`Job created successfully for resource ${resource.name}:`, id);
+        }
+      }
     }
 
-    const responseData = await response.json();
-    results.push({ name: resource.name, data: responseData });
-    return { success: true, results };
-  } catch (error) {
-    console.error(`Error processing resource ${resource.name}:`, error.message);
-    results.push({ name: resource.name, error: error.message });
-    return { success: false, error: error.message };
-  }
-}
-
-import { ObjectId } from "mongodb";
-
-async function updateJob(id, data) {
-  try {
-    const filter = { _id: id }; 
-    const response = await fetch(`http://localhost:3000/api/crud`, {
-      method: "PUT",
+    return new Response(
+      JSON.stringify({ success: true, message: "Orchestration and job creation completed successfully" }),
+      { headers: { "Content-Type": "application/json" }, status: 200 }
+    );
+  } catch (err) {
+    console.error("Orchestrator Error:", err);
+    return new Response(JSON.stringify({ success: false, error: err.message }), {
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        collectionName: "jobs",
-        filter,
-        data,
-      }),
+      status: 500,
     });
-
-    if (!response.ok) {
-      const errorDetails = await response.text();
-      throw new Error(`Failed to update job: ${response.statusText}, ${errorDetails}`);
-    }
-
-    return { success: true };
-  } catch (error) {
-    console.error("Error updating job:", error.message);
-    return { success: false, error: error.message };
   }
 }
-

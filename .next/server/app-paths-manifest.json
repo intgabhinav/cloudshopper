@@ -1,9 +1,9 @@
 {
-  "/favicon.ico/route": "app/favicon.ico/route.js",
-  "/api/crud/route": "app/api/crud/route.js",
-  "/api/resource/route": "app/api/resource/route.js",
   "/api/orchestrator/route": "app/api/orchestrator/route.js",
-  "/api/aws/ec2/create-vpc/route": "app/api/aws/ec2/create-vpc/route.js",
-  "/pages/success/page": "app/pages/success/page.js",
-  "/pages/review/page": "app/pages/review/page.js"
+  "/api/orders/route": "app/api/orders/route.js",
+  "/api/crud/route": "app/api/crud/route.js",
+  "/api/parents/route": "app/api/parents/route.js",
+  "/api/placeholders/route": "app/api/placeholders/route.js",
+  "/api/jobs/route": "app/api/jobs/route.js",
+  "/pages/success/page": "app/pages/success/page.js"
 }
