@@ -4,7 +4,7 @@ export async function POST(req) {
   try {
     const body = await req.json();
     console.log("Received data:", body);
-    const { orderID, region, name, type, inputs, status = "created" } = body;
+    const { orderID, region, name, api, type, inputs, status = "created" } = body;
 
     if (!orderID || !name || !type || !inputs || !region) {
       throw new Error("Missing required fields: orderID, region, name, type, inputs");
@@ -16,6 +16,7 @@ export async function POST(req) {
       region,
       name,
       type,
+      api,
       status,
       inputs,
       createdAt,

@@ -60,6 +60,7 @@ export async function POST(req) {
           region: order.region,
           name: resource.name,
           type: resource.type,
+          api: resourceTemplate.api,
           inputs: resolvedInputs,
           status: "created",
         };
