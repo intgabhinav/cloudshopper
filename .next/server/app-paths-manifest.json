@@ -1,6 +1,1 @@
-{
-  "/api/crud/route": "app/api/crud/route.js",
-  "/pages/review/page": "app/pages/review/page.js",
-  "/pages/success/page": "app/pages/success/page.js",
-  "/page": "app/page.js"
-}
+{}
