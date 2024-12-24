@@ -49,7 +49,7 @@ export async function POST(req) {
         const placeholderResponse = await fetch("http://localhost:3000/api/placeholders", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ template: resourceTemplate, parentDetailsArray }),
+          body: JSON.stringify({ template: resourceTemplate, parentDetailsArray, inputFields: order.inputFields }),
         });
         const { resolvedInputs } = await placeholderResponse.json();
         console.log(`Resolved inputs for resource ${resource.name}:`, resolvedInputs);

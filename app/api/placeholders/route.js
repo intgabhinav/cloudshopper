@@ -1,14 +1,12 @@
-export const runtime = "nodejs";
-
 export async function POST(req) {
   try {
     const body = await req.json();
-    const { template, parentDetailsArray } = body;
+    const { template, parentDetailsArray, inputFields } = body;
 
-    console.log("Received data:", template, parentDetailsArray);
+    console.log("Received data:", template, parentDetailsArray, inputFields);
 
-    if (!template || !parentDetailsArray) {
-      throw new Error("Template and Parent Details are required");
+    if (!template || !parentDetailsArray || !inputFields) {
+      throw new Error("Template, Parent Details, and Input Fields are required");
     }
 
     if (!template.inputs || typeof template.inputs !== "object") {
@@ -24,13 +22,21 @@ export async function POST(req) {
         const [parentType, ...pathParts] = placeholder.split(".");
 
         let resolvedValue;
-        for (const { details: parentDetails } of parentDetailsArray) {
-          if (parentDetails.type === parentType) {
-            resolvedValue = parentDetails; // Start with parentDetails
-            for (const path of pathParts) {
-              resolvedValue = resolvedValue?.[path];
+
+        // First, check if the placeholder refers to inputFields
+        if (placeholder.startsWith("inputFields.")) {
+          const inputFieldKey = placeholder.slice("inputFields.".length);
+          resolvedValue = inputFields[inputFieldKey];  // Look up directly in inputFields
+        } else {
+          // Try resolving from parent details as before
+          for (const { details: parentDetails } of parentDetailsArray) {
+            if (parentDetails.type === parentType) {
+              resolvedValue = parentDetails; // Start with parentDetails
+              for (const path of pathParts) {
+                resolvedValue = resolvedValue?.[path];
+              }
+              if (resolvedValue !== undefined) break; // Stop if resolved successfully
             }
-            if (resolvedValue !== undefined) break; // Stop if resolved successfully
           }
         }
 
