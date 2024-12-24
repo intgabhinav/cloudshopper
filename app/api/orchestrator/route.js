@@ -4,13 +4,13 @@ export async function POST(req) {
   try {
     const body = await req.json();
     const { orderID } = body;
-    console.log("Orchestrator started with Order ID:", orderID);
+    console.log("01 Orchestrator started with Order ID:", orderID);
 
     // Step 1: Fetch order details
     const orderResponse = await fetch(`http://localhost:3000/api/orders?orderID=${orderID}`);
     if (!orderResponse.ok) throw new Error("Failed to fetch order details");
     const { order } = await orderResponse.json();
-    console.log("Fetched order details:", order);
+    console.log("02 Fetched order details:", order);
 
     // Step 2: Process resources
     for (const resource of order.resources) {
@@ -71,11 +71,83 @@ export async function POST(req) {
           body: JSON.stringify(jobData),
         });
 
-        if (!jobCreationResponse.ok) {
-          console.error(`Failed to create job for resource ${resource.name}:`, await jobCreationResponse.text());
+        const jobResult = await jobCreationResponse.json();
+
+        if (jobResult.success) {
+          const jobId = jobResult.id;
+
+          // Trigger resource creation
+          const resourceCreationResponse = await fetch("http://localhost:3000/api/resource/create", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ jobId }),
+          });
+
+          if (!resourceCreationResponse.ok) {
+            console.error(`Failed to trigger resource creation for job ${jobId}`);
+          } else {
+            console.log(`Resource creation triggered for job ${jobId}`);
+          }
         } else {
-          const { id } = await jobCreationResponse.json();
-          console.log(`Job created successfully for resource ${resource.name}:`, id);
+          console.error("Failed to create job:", jobResult.error);
+        }
+      } else {
+        // Case when no parent is specified for the resource
+        console.log(`No parent specified for resource ${resource.name}. Skipping parent resolution.`);
+
+        // Fetch resource template
+        const filter = JSON.stringify({ type: resource.type });
+        const resourceTemplateResponse = await fetch(
+          `http://localhost:3000/api/crud?collectionName=resources&filter=${encodeURIComponent(filter)}`
+        );
+        const resourceTemplate = await resourceTemplateResponse.json();
+        console.log(`Fetched resource template for resource ${resource.name}:`, resourceTemplate);
+
+        // Step 4: Resolve placeholders (without parent details)
+        const placeholderResponse = await fetch("http://localhost:3000/api/placeholders", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ template: resourceTemplate, parentDetailsArray: [], inputFields: order.inputFields }),
+        });
+        const { resolvedInputs } = await placeholderResponse.json();
+        console.log(`Resolved inputs for resource ${resource.name}:`, resolvedInputs);
+
+        // Step 5: Send job creation request to the CRUD API
+        const jobData = {
+          orderID,
+          region: order.region,
+          name: resource.name,
+          type: resource.type,
+          api: resourceTemplate.api,
+          inputs: resolvedInputs,
+          status: "created",
+        };
+
+        const jobCreationResponse = await fetch("http://localhost:3000/api/jobs", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(jobData),
+        });
+
+        const jobResult = await jobCreationResponse.json();
+
+        if (jobResult.success) {
+          const jobId = jobResult.id;
+
+          // Trigger resource creation
+          const resourceCreationResponse = await fetch("http://localhost:3000/api/resource/create", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ jobId }),
+          });
+
+          if (!resourceCreationResponse.ok) {
+            console.error(`Failed to trigger resource creation for job ${jobId}`);
+          } else {
+            console.log(`Resource creation triggered for job ${jobId}`);
+          }
+        } else {
+          console.error("Failed to create job:", jobResult.error);
         }
       }
     }

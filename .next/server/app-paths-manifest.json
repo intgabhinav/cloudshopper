@@ -1,9 +1,16 @@
 {
+  "/api/options/[option]/route": "app/api/options/[option]/route.js",
+  "/api/builder/order/route": "app/api/builder/order/route.js",
+  "/api/crud/route": "app/api/crud/route.js",
   "/api/orchestrator/route": "app/api/orchestrator/route.js",
   "/api/orders/route": "app/api/orders/route.js",
-  "/api/crud/route": "app/api/crud/route.js",
-  "/api/parents/route": "app/api/parents/route.js",
   "/api/placeholders/route": "app/api/placeholders/route.js",
   "/api/jobs/route": "app/api/jobs/route.js",
-  "/pages/success/page": "app/pages/success/page.js"
+  "/api/resource/create/route": "app/api/resource/create/route.js",
+  "/api/aws/ec2/create-vpc/route": "app/api/aws/ec2/create-vpc/route.js",
+  "/api/parents/route": "app/api/parents/route.js",
+  "/api/aws/ec2/create-subnet/route": "app/api/aws/ec2/create-subnet/route.js",
+  "/pages/review/page": "app/pages/review/page.js",
+  "/pages/success/page": "app/pages/success/page.js",
+  "/page": "app/page.js"
 }
