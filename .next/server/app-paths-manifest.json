@@ -1,1 +1,9 @@
-{}
+{
+  "/api/crud/route": "app/api/crud/route.js",
+  "/api/orchestrator/route": "app/api/orchestrator/route.js",
+  "/api/orders/route": "app/api/orders/route.js",
+  "/api/parents/route": "app/api/parents/route.js",
+  "/api/placeholders/route": "app/api/placeholders/route.js",
+  "/api/jobs/route": "app/api/jobs/route.js",
+  "/pages/success/page": "app/pages/success/page.js"
+}

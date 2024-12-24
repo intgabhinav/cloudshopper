@@ -11,7 +11,7 @@ export const runtime = "nodejs"; // Ensure server-side runtime
 export async function POST(req) {
   try {
     const body = await req.json();
-    const { collectionName, ...data } = body;
+    const { collectionName, job, ...data } = body;
 
     console.log("Received POST request:", body);
     const timestamps = {
@@ -19,7 +19,14 @@ export async function POST(req) {
       updatedAt: new Date().toISOString(),
     };
 
-    const result = await createRecord(collectionName, { ...data, ...timestamps });
+    // Flatten job object by spreading its properties directly into the data object
+    const flattenedData = {
+      ...job,  // All properties from the 'job' object
+      ...data,  // Additional properties from the request body (if any)
+      ...timestamps,  // Add timestamps
+    };
+
+    const result = await createRecord(collectionName, flattenedData);
 
     return new Response(
       JSON.stringify({ success: true, id: result.id }),
@@ -33,6 +40,7 @@ export async function POST(req) {
     );
   }
 }
+
 // Other methods (GET, PUT, DELETE) remain generic and reusable as written before.
 
 
