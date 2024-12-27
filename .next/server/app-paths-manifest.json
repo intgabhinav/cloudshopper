@@ -10,7 +10,7 @@
   "/api/aws/ec2/create-vpc/route": "app/api/aws/ec2/create-vpc/route.js",
   "/api/parents/route": "app/api/parents/route.js",
   "/api/aws/ec2/create-subnet/route": "app/api/aws/ec2/create-subnet/route.js",
+  "/api/aws/ec2/create-igw/route": "app/api/aws/ec2/create-igw/route.js",
   "/pages/review/page": "app/pages/review/page.js",
-  "/pages/success/page": "app/pages/success/page.js",
-  "/page": "app/page.js"
+  "/pages/success/page": "app/pages/success/page.js"
 }

@@ -6,11 +6,11 @@ import { EC2Client, CreateSubnetCommand } from "@aws-sdk/client-ec2";
 export async function POST(req) {
   try {
     const body = await req.json();
-    console.log("Received POST request:", body);
+    console.log("Received POST request SUBNET:", body);
 
     // Extract region and inputs
-    const { region, inputs } = body;
-    const { VpcId, CidrBlock, name } = inputs || {};
+    const { region, inputs, name } = body;
+    const { VpcId, CidrBlock } = inputs || {};
 
     // Validate required fields
     validateRequestFields({ region, VpcId, CidrBlock });

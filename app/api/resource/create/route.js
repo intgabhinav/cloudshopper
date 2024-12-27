@@ -26,7 +26,7 @@ export async function POST(req) {
     }
 
     const job = jobDetails; // Assuming jobDetails is a single object
-    const { api, inputs, region } = job;
+    const { api, inputs, region, name } = job;
 
     if (!api || !inputs) {
       throw new Error("Missing API or inputs in the job data");
@@ -37,7 +37,7 @@ export async function POST(req) {
     const resourceCreationResponse = await fetch(`${baseUrl}${api}`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ region, inputs }),
+      body: JSON.stringify({ region, inputs, name }),
     });
 
     if (!resourceCreationResponse.ok) {

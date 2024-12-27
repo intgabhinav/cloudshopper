@@ -38,7 +38,7 @@ export async function POST(req) {
         console.log(`Resolved parents for resource ${resource.name}:`, parentDetailsArray);
 
         // Step 3: Fetch resource template
-        const filter = JSON.stringify({ type: resource.type });
+        const filter = JSON.stringify({ type: resource.type, name: resource.name });
         const resourceTemplateResponse = await fetch(
           `http://localhost:3000/api/crud?collectionName=resources&filter=${encodeURIComponent(filter)}`
         );

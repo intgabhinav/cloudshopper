@@ -6,7 +6,7 @@ import { EC2Client, CreateVpcCommand } from "@aws-sdk/client-ec2";
 export async function POST(req) {
   try {
     const body = await req.json();
-    console.log("Received POST request:", body);
+    console.log("Received POST request VPC:", body);
 
     // Extract region and inputs
     const { region, inputs } = body;
