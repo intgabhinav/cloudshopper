@@ -15,6 +15,21 @@ export async function POST(req) {
     // Step 2: Process resources
     for (const resource of order.resources) {
       console.log(`Processing resource: ${resource.name} (${resource})`);
+
+      // Check if the resource creation job already exists and is completed
+      const filter = JSON.stringify({ orderID, name: resource.name });
+      const jobCheckResponse = await fetch(
+        `http://localhost:3000/api/crud?collectionName=jobs&filter=${encodeURIComponent(filter)}`
+      );
+
+      const jobCheck = await jobCheckResponse.json();
+      console.log(`Job check for ${resource.name}:`, jobCheck);
+      if (jobCheck &&  jobCheck.status === "completed") {
+        console.log(`Resource ${resource.name} already created. Skipping.`);
+        continue;
+      }
+
+
       if (resource.parent && Array.isArray(resource.parent)) {
         const parentDetailsArray = [];
 
