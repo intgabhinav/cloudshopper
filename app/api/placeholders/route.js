@@ -15,6 +15,14 @@ export async function POST(req) {
 
     const resolvedInputs = {};
     const unresolvedPlaceholders = []; // Track unresolved placeholders
+    const parentDetailsMap = {}; // For faster lookup of parent details
+
+    // Create a map of parent types to their details for faster lookup
+    parentDetailsArray.forEach(({ details: parentDetails }) => {
+      if (parentDetails && parentDetails.type) {
+        parentDetailsMap[parentDetails.type] = parentDetails;
+      }
+    });
 
     for (const [key, value] of Object.entries(template.inputs)) {
       if (typeof value === "string" && value.startsWith("{{") && value.endsWith("}}")) {
@@ -28,24 +36,26 @@ export async function POST(req) {
           const inputFieldKey = placeholder.slice("inputFields.".length);
           resolvedValue = inputFields[inputFieldKey];  // Look up directly in inputFields
         } else {
-          // Try resolving from parent details as before
-          for (const { details: parentDetails } of parentDetailsArray) {
-            if (parentDetails.type === parentType) {
-              resolvedValue = parentDetails; // Start with parentDetails
+          // Check if resource has a parent and try resolving from parent details if parentType exists
+          if (parentType) {
+            const parentDetails = parentDetailsMap[parentType];
+            if (parentDetails) {
+              resolvedValue = parentDetails;
               for (const path of pathParts) {
-                resolvedValue = resolvedValue?.[path];
+                resolvedValue = resolvedValue?.[path];  // Access nested properties safely
               }
-              if (resolvedValue !== undefined) break; // Stop if resolved successfully
             }
+          }
+
+          // If no parent details were found or the parentType was not provided, use fallback (inputFields or null)
+          if (resolvedValue === undefined) {
+            console.error(`Failed to resolve placeholder '${value}' for input key '${key}'`);
+            unresolvedPlaceholders.push({ key, placeholder: value });
+            resolvedValue = null; // Fallback to null if unresolved
           }
         }
 
-        if (resolvedValue === undefined) {
-          console.error(`Failed to resolve placeholder '${value}' for input key '${key}'`);
-          unresolvedPlaceholders.push({ key, placeholder: value });
-        }
-
-        resolvedInputs[key] = resolvedValue;
+        resolvedInputs[key] = resolvedValue !== undefined ? resolvedValue : null;
       } else {
         resolvedInputs[key] = value;
       }

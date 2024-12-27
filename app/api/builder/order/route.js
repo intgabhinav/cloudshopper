@@ -19,11 +19,11 @@ export async function POST(req) {
 
     // Find data matching the `bundle` and `plan`
     const filter = { 
-      "data.bundle": bundle, 
-      "data.plan": plan 
+      "bundle": bundle, 
+      "plan": plan 
     };
     const data = await db
-      .collection('builder')
+      .collection('builderv1')
       .find(filter)
       .toArray();
 
@@ -40,10 +40,10 @@ export async function POST(req) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           collectionName: "orders", // Specify target collection
-          bundle: item.data.bundle,
-          plan: item.data.plan,
-          region: item.data.region,
-          resources: item.data.resources,
+          bundle: item.bundle,
+          plan: item.plan,
+          region: item.region,
+          resources: item.resources,
           inputFields,
           // : {
           //   region: inputFields.region,
@@ -64,7 +64,7 @@ export async function POST(req) {
     );
       
   } catch (error) {
-    console.error("Error in /api/builder:", error);
+    console.error("Error in /api/builderv1:", error);
     return new Response(
       JSON.stringify({ error: "Internal server error" }),
       { status: 500, headers: { "Content-Type": "application/json" } }
