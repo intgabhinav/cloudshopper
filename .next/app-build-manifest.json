@@ -71,15 +71,15 @@
       "static/chunks/main-app.js",
       "static/chunks/app/api/aws/ec2/create-subnet/route.js"
     ],
-    "/api/aws/ec2/create-igw/route": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/api/aws/ec2/create-igw/route.js"
-    ],
     "/pages/success/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
       "static/chunks/app/pages/success/page.js"
+    ],
+    "/api/aws/ec2/create-igw/route": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/api/aws/ec2/create-igw/route.js"
     ],
     "/api/aws/ec2/create-natgw/route": [
       "static/chunks/webpack.js",

@@ -14,6 +14,7 @@ export async function POST(req) {
 
     // Step 2: Process resources
     for (const resource of order.resources) {
+      console.log(`Processing resource: ${resource.name} (${resource})`);
       if (resource.parent && Array.isArray(resource.parent)) {
         const parentDetailsArray = [];
 
@@ -38,9 +39,9 @@ export async function POST(req) {
         console.log(`Resolved parents for resource ${resource.name}:`, parentDetailsArray);
 
         // Step 3: Fetch resource template
-        const filter = JSON.stringify({ type: resource.type, name: resource.name });
+        const filter = JSON.stringify({ type: resource.type });
         const resourceTemplateResponse = await fetch(
-          `http://localhost:3000/api/crud?collectionName=resources&filter=${encodeURIComponent(filter)}`
+          `http://localhost:3000/api/crud?collectionName=resourcesv1&filter=${encodeURIComponent(filter)}`
         );
         const resourceTemplate = await resourceTemplateResponse.json();
         console.log(`Fetched resource template for resource ${resource.name}:`, resourceTemplate);
@@ -54,6 +55,10 @@ export async function POST(req) {
         const { resolvedInputs } = await placeholderResponse.json();
         console.log(`Resolved inputs for resource ${resource.name}:`, resolvedInputs);
 
+        const mergedInputs = (resource.inputs && Object.keys(resource.inputs).length > 0)
+        ? { ...resolvedInputs, ...resource.inputs }
+        : resolvedInputs;
+
         // Step 5: Send job creation request to the CRUD API
         const jobData = {
           orderID,
@@ -61,7 +66,7 @@ export async function POST(req) {
           name: resource.name,
           type: resource.type,
           api: resourceTemplate.api,
-          inputs: resolvedInputs,
+          inputs: mergedInputs,
           status: "created",
         };
 
@@ -98,7 +103,7 @@ export async function POST(req) {
         // Fetch resource template
         const filter = JSON.stringify({ type: resource.type });
         const resourceTemplateResponse = await fetch(
-          `http://localhost:3000/api/crud?collectionName=resources&filter=${encodeURIComponent(filter)}`
+          `http://localhost:3000/api/crud?collectionName=resourcesv1&filter=${encodeURIComponent(filter)}`
         );
         const resourceTemplate = await resourceTemplateResponse.json();
         console.log(`Fetched resource template for resource ${resource.name}:`, resourceTemplate);
@@ -112,6 +117,15 @@ export async function POST(req) {
         const { resolvedInputs } = await placeholderResponse.json();
         console.log(`Resolved inputs for resource ${resource.name}:`, resolvedInputs);
 
+        console.log(`Resource Inputs for resource ${resource.name}:`, resource);
+        
+        const mergedInputs = (resource.inputs && Object.keys(resource.inputs).length > 0)
+          ? { ...resolvedInputs, ...resource.inputs }
+          : resolvedInputs;
+        
+        console.log(`Merged inputs for resource ${resource.name}:`, mergedInputs);
+        
+
         // Step 5: Send job creation request to the CRUD API
         const jobData = {
           orderID,
@@ -119,7 +133,7 @@ export async function POST(req) {
           name: resource.name,
           type: resource.type,
           api: resourceTemplate.api,
-          inputs: resolvedInputs,
+          inputs: mergedInputs,
           status: "created",
         };
 
