@@ -23,7 +23,10 @@ import {
       const ec2Client = initializeEC2Client(region);
   
       // Create Security Group
-      const securityGroupId = await createSecurityGroup(ec2Client, VpcId, groupName, description);
+      const securityGroupResponse = await createSecurityGroup(ec2Client, VpcId, groupName, description);
+      console.log("Security Group created with GroupId:", securityGroupResponse);
+  
+      const securityGroupId = await securityGroupResponse.GroupId;
   
       // Add Ingress Rules
       await addIngressRules(ec2Client, securityGroupId, ingressRules);
@@ -35,7 +38,7 @@ import {
       return sendResponse(200, {
         success: true,
         message: "Security Group created successfully",
-        SecurityGroupId: securityGroupId,
+        details: {"GroupId" : securityGroupId, "GroupName" : groupName},
         name,
       });
     } catch (error) {
@@ -87,7 +90,7 @@ import {
       const result = await ec2Client.send(command);
   
       console.log("Security Group created with GroupId:", result.GroupId);
-      return result.GroupId;
+      return result;
     } catch (error) {
       console.error("AWS SDK Error during Security Group creation:", error.message || error);
       throw new Error("AWS SDK failed to create Security Group");

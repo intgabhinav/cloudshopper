@@ -5,8 +5,9 @@
   "/api/parents/route": "app/api/parents/route.js",
   "/api/placeholders/route": "app/api/placeholders/route.js",
   "/api/jobs/route": "app/api/jobs/route.js",
-  "/api/aws/ec2/create-sg/route": "app/api/aws/ec2/create-sg/route.js",
   "/api/resource/create/route": "app/api/resource/create/route.js",
+  "/api/aws/ec2/create-ec2/route": "app/api/aws/ec2/create-ec2/route.js",
+  "/favicon.ico/route": "app/favicon.ico/route.js",
   "/pages/review/page": "app/pages/review/page.js",
   "/pages/success/page": "app/pages/success/page.js",
   "/page": "app/page.js"

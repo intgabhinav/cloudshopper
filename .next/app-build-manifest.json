@@ -100,6 +100,11 @@
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
       "static/chunks/app/api/aws/ec2/create-sg/route.js"
+    ],
+    "/api/aws/ec2/create-ec2/route": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/api/aws/ec2/create-ec2/route.js"
     ]
   }
 }
