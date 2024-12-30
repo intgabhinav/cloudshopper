@@ -14,8 +14,8 @@ export async function POST(req) {
     }
 
     const resolvedInputs = {};
-    const unresolvedPlaceholders = []; // Track unresolved placeholders
-    const parentDetailsMap = {}; // For faster lookup of parent details
+    const unresolvedPlaceholders = [];
+    const parentDetailsMap = {};
 
     // Create a map of parent types to their details for faster lookup
     parentDetailsArray.forEach(({ details: parentDetails }) => {
@@ -24,6 +24,9 @@ export async function POST(req) {
       }
     });
 
+    // Log parentDetailsMap to debug
+    console.log("Parent Details Map:", parentDetailsMap);
+
     for (const [key, value] of Object.entries(template.inputs)) {
       if (typeof value === "string" && value.startsWith("{{") && value.endsWith("}}")) {
         const placeholder = value.slice(2, -2); // Remove {{ and }}
@@ -31,31 +34,35 @@ export async function POST(req) {
 
         let resolvedValue;
 
-        // First, check if the placeholder refers to inputFields
+        // Check if placeholder refers to inputFields
         if (placeholder.startsWith("inputFields.")) {
           const inputFieldKey = placeholder.slice("inputFields.".length);
-          resolvedValue = inputFields[inputFieldKey];  // Look up directly in inputFields
-        } else {
-          // Check if resource has a parent and try resolving from parent details if parentType exists
-          if (parentType) {
-            const parentDetails = parentDetailsMap[parentType];
-            if (parentDetails) {
-              resolvedValue = parentDetails;
-              for (const path of pathParts) {
-                resolvedValue = resolvedValue?.[path];  // Access nested properties safely
-              }
-            }
-          }
+          resolvedValue = inputFields[inputFieldKey];
+        } else if (parentType && pathParts.length > 1 && pathParts[0] === "outputs") {
+          // Check parent details for outputs
+          const outputKey = pathParts[1]; // Extract "GroupId" from "outputs.GroupId"
+          const parentDetails = parentDetailsMap[parentType];
 
-          // If no parent details were found or the parentType was not provided, use fallback (inputFields or null)
-          if (resolvedValue === undefined) {
-            console.error(`Failed to resolve placeholder '${value}' for input key '${key}'`);
-            unresolvedPlaceholders.push({ key, placeholder: value });
-            resolvedValue = null; // Fallback to null if unresolved
+          if (parentDetails && parentDetails.outputs) {
+            resolvedValue = parentDetails.outputs[outputKey];
+            console.log(`Resolved value for ${placeholder}:`, resolvedValue);
+          } else {
+            console.error(`Failed to find parent details or outputs for ${parentType}`);
           }
         }
 
-        resolvedInputs[key] = resolvedValue !== undefined ? resolvedValue : null;
+        if (resolvedValue === undefined) {
+          console.error(`Failed to resolve placeholder '${value}' for input key '${key}'`);
+          unresolvedPlaceholders.push({ key, placeholder: value });
+          resolvedValue = null; // Fallback to null if unresolved
+        }
+
+        // Wrap SecurityGroupIds in an array if needed
+        if (key === "SecurityGroupIds" && resolvedValue !== null) {
+          resolvedInputs[key] = [resolvedValue];
+        } else {
+          resolvedInputs[key] = resolvedValue;
+        }
       } else {
         resolvedInputs[key] = value;
       }

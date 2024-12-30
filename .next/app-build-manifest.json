@@ -1,21 +1,5 @@
 {
   "pages": {
-    "/layout": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/css/app/layout.css",
-      "static/chunks/app/layout.js"
-    ],
-    "/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/page.js"
-    ],
-    "/api/options/[option]/route": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/api/options/[option]/route.js"
-    ],
     "/api/builder/order/route": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
@@ -25,6 +9,12 @@
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
       "static/chunks/app/api/crud/route.js"
+    ],
+    "/layout": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/css/app/layout.css",
+      "static/chunks/app/layout.js"
     ],
     "/pages/review/page": [
       "static/chunks/webpack.js",
@@ -71,11 +61,6 @@
       "static/chunks/main-app.js",
       "static/chunks/app/api/aws/ec2/create-subnet/route.js"
     ],
-    "/pages/success/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/pages/success/page.js"
-    ],
     "/api/aws/ec2/create-igw/route": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
@@ -85,6 +70,26 @@
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
       "static/chunks/app/api/aws/ec2/create-natgw/route.js"
+    ],
+    "/api/aws/ec2/create-route/route": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/api/aws/ec2/create-route/route.js"
+    ],
+    "/api/aws/ec2/create-sg/route": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/api/aws/ec2/create-sg/route.js"
+    ],
+    "/api/aws/ec2/create-ec2/route": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/api/aws/ec2/create-ec2/route.js"
+    ],
+    "/pages/success/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/pages/success/page.js"
     ]
   }
 }

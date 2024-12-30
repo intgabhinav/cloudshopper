@@ -1,0 +1,21 @@
+{
+    "region": "us-east-1",
+    "inputs": {
+      "ImageId": "ami-0abcdef1234567890",
+      "InstanceType": "t2.micro",
+      "KeyName": "my-key-pair",
+      "SecurityGroupIds": ["sg-0cc6322c9fdb2d1f4"],
+      "SubnetId": "subnet-015934ad6e443a9f1",
+      "TagSpecifications": [
+        {
+          "ResourceType": "instance",
+          "Tags": [
+            { "Key": "Name", "Value": "MyInstance" },
+            { "Key": "Environment", "Value": "Development" }
+          ]
+        }
+      ]
+    },
+    "name": "MyEC2Instance"
+  }
+  
