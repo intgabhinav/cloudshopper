@@ -12,27 +12,42 @@ export async function POST(req) {
     const { order } = await orderResponse.json();
     console.log("02 Fetched order details:", order);
 
-    // Step 2: Process resources
-    for (const resource of order.resources) {
-      console.log(`Processing resource: ${resource.name} (${resource})`);
+    // Step 2: Sort resources by order
+    const sortedResources = order.resources.sort((a, b) => a.order - b.order);
+    console.log("Sorted resources by order:", sortedResources);
+
+    // Step 3: Process resources by order
+    let currentOrder = -1;
+    let jobPromises = [];
+
+    for (const resource of sortedResources) {
+      if (resource.order !== currentOrder) {
+        // Wait for all jobs from the previous order to complete before starting the new order
+        if (jobPromises.length > 0) {
+          await Promise.all(jobPromises);  // Wait for the previous order's tasks to finish
+          jobPromises = [];  // Reset job promises for the next order
+        }
+        currentOrder = resource.order;
+        console.log(`Processing resources of order ${currentOrder}`);
+      }
+
+      console.log(`Processing resource: ${resource.name}`);
 
       // Check if the resource creation job already exists and is completed
       const filter = JSON.stringify({ orderID, name: resource.name });
       const jobCheckResponse = await fetch(
         `http://localhost:3000/api/crud?collectionName=jobs&filter=${encodeURIComponent(filter)}`
       );
-
       const jobCheck = await jobCheckResponse.json();
       console.log(`Job check for ${resource.name}:`, jobCheck);
-      if (jobCheck &&  jobCheck.status === "completed") {
+
+      if (jobCheck && jobCheck.status === "completed") {
         console.log(`Resource ${resource.name} already created. Skipping.`);
         continue;
       }
 
-
+      let parentDetailsArray = [];
       if (resource.parent && Array.isArray(resource.parent)) {
-        const parentDetailsArray = [];
-
         // Fetch details for all parents of the resource
         for (const parent of resource.parent) {
           const responseParent = await fetch("http://localhost:3000/api/parents", {
@@ -52,133 +67,67 @@ export async function POST(req) {
         }
 
         console.log(`Resolved parents for resource ${resource.name}:`, parentDetailsArray);
+      }
 
-        // Step 3: Fetch resource template
-        const filter = JSON.stringify({ type: resource.type });
-        const resourceTemplateResponse = await fetch(
-          `http://localhost:3000/api/crud?collectionName=resourcesv1&filter=${encodeURIComponent(filter)}`
-        );
-        const resourceTemplate = await resourceTemplateResponse.json();
-        console.log(`Fetched resource template for resource ${resource.name}:`, resourceTemplate);
+      // Step 3: Fetch resource template
+      const resourceTemplateResponse = await fetch(
+        `http://localhost:3000/api/crud?collectionName=resourcesv1&filter=${encodeURIComponent(
+          JSON.stringify({ type: resource.type })
+        )}`
+      );
+      const resourceTemplate = await resourceTemplateResponse.json();
+      console.log(`Fetched resource template for resource ${resource.name}:`, resourceTemplate);
 
-        // Step 4: Resolve placeholders
-        const placeholderResponse = await fetch("http://localhost:3000/api/placeholders", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ template: resourceTemplate, parentDetailsArray, inputFields: order.inputFields }),
-        });
-        const { resolvedInputs } = await placeholderResponse.json();
-        console.log(`Resolved inputs for resource ${resource.name}:`, resolvedInputs);
+      // Step 4: Resolve placeholders
+      const placeholderResponse = await fetch("http://localhost:3000/api/placeholders", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ template: resourceTemplate, parentDetailsArray, inputFields: order.inputFields }),
+      });
+      const { resolvedInputs } = await placeholderResponse.json();
+      console.log(`Resolved inputs for resource ${resource.name}:`, resolvedInputs);
 
-        const mergedInputs = (resource.inputs && Object.keys(resource.inputs).length > 0)
+      const mergedInputs = (resource.inputs && Object.keys(resource.inputs).length > 0)
         ? { ...resolvedInputs, ...resource.inputs }
         : resolvedInputs;
 
-        // Step 5: Send job creation request to the CRUD API
-        const jobData = {
-          orderID,
-          region: order.region,
-          name: resource.name,
-          type: resource.type,
-          api: resourceTemplate.api,
-          inputs: mergedInputs,
-          status: "created",
-        };
+      // Step 5: Send job creation request to the CRUD API
+      const jobData = {
+        orderID,
+        region: order.region,
+        name: resource.name,
+        type: resource.type,
+        api: resourceTemplate.api,
+        inputs: mergedInputs,
+        status: "created",
+      };
 
-        const jobCreationResponse = await fetch("http://localhost:3000/api/jobs", {
+      const jobCreationResponse = await fetch("http://localhost:3000/api/jobs", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(jobData),
+      });
+
+      const jobResult = await jobCreationResponse.json();
+      if (jobResult.success) {
+        const jobId = jobResult.id;
+
+        // Trigger resource creation
+        const resourceCreationResponse = fetch("http://localhost:3000/api/resource/create", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(jobData),
+          body: JSON.stringify({ jobId }),
         });
 
-        const jobResult = await jobCreationResponse.json();
-
-        if (jobResult.success) {
-          const jobId = jobResult.id;
-
-          // Trigger resource creation
-          const resourceCreationResponse = await fetch("http://localhost:3000/api/resource/create", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ jobId }),
-          });
-
-          if (!resourceCreationResponse.ok) {
-            console.error(`Failed to trigger resource creation for job ${jobId}`);
-          } else {
-            console.log(`Resource creation triggered for job ${jobId}`);
-          }
-        } else {
-          console.error("Failed to create job:", jobResult.error);
-        }
+        jobPromises.push(resourceCreationResponse);  // Add job creation to the jobPromises array
       } else {
-        // Case when no parent is specified for the resource
-        console.log(`No parent specified for resource ${resource.name}. Skipping parent resolution.`);
-
-        // Fetch resource template
-        const filter = JSON.stringify({ type: resource.type });
-        const resourceTemplateResponse = await fetch(
-          `http://localhost:3000/api/crud?collectionName=resourcesv1&filter=${encodeURIComponent(filter)}`
-        );
-        const resourceTemplate = await resourceTemplateResponse.json();
-        console.log(`Fetched resource template for resource ${resource.name}:`, resourceTemplate);
-
-        // Step 4: Resolve placeholders (without parent details)
-        const placeholderResponse = await fetch("http://localhost:3000/api/placeholders", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ template: resourceTemplate, parentDetailsArray: [], inputFields: order.inputFields }),
-        });
-        const { resolvedInputs } = await placeholderResponse.json();
-        console.log(`Resolved inputs for resource ${resource.name}:`, resolvedInputs);
-
-        console.log(`Resource Inputs for resource ${resource.name}:`, resource);
-        
-        const mergedInputs = (resource.inputs && Object.keys(resource.inputs).length > 0)
-          ? { ...resolvedInputs, ...resource.inputs }
-          : resolvedInputs;
-        
-        console.log(`Merged inputs for resource ${resource.name}:`, mergedInputs);
-        
-
-        // Step 5: Send job creation request to the CRUD API
-        const jobData = {
-          orderID,
-          region: order.region,
-          name: resource.name,
-          type: resource.type,
-          api: resourceTemplate.api,
-          inputs: mergedInputs,
-          status: "created",
-        };
-
-        const jobCreationResponse = await fetch("http://localhost:3000/api/jobs", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(jobData),
-        });
-
-        const jobResult = await jobCreationResponse.json();
-
-        if (jobResult.success) {
-          const jobId = jobResult.id;
-
-          // Trigger resource creation
-          const resourceCreationResponse = await fetch("http://localhost:3000/api/resource/create", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ jobId }),
-          });
-
-          if (!resourceCreationResponse.ok) {
-            console.error(`Failed to trigger resource creation for job ${jobId}`);
-          } else {
-            console.log(`Resource creation triggered for job ${jobId}`);
-          }
-        } else {
-          console.error("Failed to create job:", jobResult.error);
-        }
+        console.error("Failed to create job:", jobResult.error);
       }
+    }
+
+    // Wait for any remaining jobs to finish
+    if (jobPromises.length > 0) {
+      await Promise.all(jobPromises);
     }
 
     return new Response(
