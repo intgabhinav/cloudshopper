@@ -1,5 +1,15 @@
 {
   "pages": {
+    "/api/aws/create-rds/route": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/api/aws/create-rds/route.js"
+    ],
+    "/api/options/[option]/route": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/api/options/[option]/route.js"
+    ],
     "/api/builder/order/route": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",

@@ -15,6 +15,7 @@
 
 # next.js
 /.next/
+.next/
 /out/
 
 # production
@@ -62,3 +63,4 @@ import { EC2Client, CreateVpcCommand } f.ts
 .next/cache/webpack/client-development/1.pack.gz
 .next/trace
 .next/app-build-manifest.json
+.next/server/vendor-chunks/next.js
