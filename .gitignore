@@ -64,3 +64,5 @@ import { EC2Client, CreateVpcCommand } f.ts
 .next/trace
 .next/app-build-manifest.json
 .next/server/vendor-chunks/next.js
+.next/trace
+.next/cache/webpack/client-development/2.pack.gz

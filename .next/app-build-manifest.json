@@ -1,105 +1,20 @@
 {
   "pages": {
-    "/api/aws/create-rds/route": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/api/aws/create-rds/route.js"
-    ],
-    "/api/options/[option]/route": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/api/options/[option]/route.js"
-    ],
-    "/api/builder/order/route": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/api/builder/order/route.js"
-    ],
-    "/api/crud/route": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/api/crud/route.js"
-    ],
     "/layout": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
       "static/css/app/layout.css",
       "static/chunks/app/layout.js"
     ],
-    "/pages/review/page": [
+    "/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/chunks/app/pages/review/page.js"
+      "static/chunks/app/page.js"
     ],
-    "/api/orchestrator/route": [
+    "/api/options/[option]/route": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/chunks/app/api/orchestrator/route.js"
-    ],
-    "/api/orders/route": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/api/orders/route.js"
-    ],
-    "/api/placeholders/route": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/api/placeholders/route.js"
-    ],
-    "/api/jobs/route": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/api/jobs/route.js"
-    ],
-    "/api/resource/create/route": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/api/resource/create/route.js"
-    ],
-    "/api/aws/ec2/create-vpc/route": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/api/aws/ec2/create-vpc/route.js"
-    ],
-    "/api/parents/route": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/api/parents/route.js"
-    ],
-    "/api/aws/ec2/create-subnet/route": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/api/aws/ec2/create-subnet/route.js"
-    ],
-    "/api/aws/ec2/create-igw/route": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/api/aws/ec2/create-igw/route.js"
-    ],
-    "/api/aws/ec2/create-natgw/route": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/api/aws/ec2/create-natgw/route.js"
-    ],
-    "/api/aws/ec2/create-route/route": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/api/aws/ec2/create-route/route.js"
-    ],
-    "/api/aws/ec2/create-sg/route": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/api/aws/ec2/create-sg/route.js"
-    ],
-    "/api/aws/ec2/create-ec2/route": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/api/aws/ec2/create-ec2/route.js"
-    ],
-    "/pages/success/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/pages/success/page.js"
+      "static/chunks/app/api/options/[option]/route.js"
     ]
   }
 }
