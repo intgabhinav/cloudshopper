@@ -23,7 +23,7 @@ export async function POST(req) {
       "plan": plan 
     };
     const data = await db
-      .collection('builderv1')
+      .collection('builderv2')
       .find(filter)
       .toArray();
 
@@ -64,7 +64,7 @@ export async function POST(req) {
     );
       
   } catch (error) {
-    console.error("Error in /api/builderv1:", error);
+    console.error("Error in /api/builder:", error);
     return new Response(
       JSON.stringify({ error: "Internal server error" }),
       { status: 500, headers: { "Content-Type": "application/json" } }

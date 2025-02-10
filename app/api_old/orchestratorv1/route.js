@@ -7,7 +7,7 @@ export async function POST(req) {
     console.log("01 Orchestrator started with Order ID:", orderID);
 
     // Step 1: Fetch order details
-    const orderResponse = await fetch(`http://localhost:3000/api/order?orderID=${orderID}`);
+    const orderResponse = await fetch(`http://localhost:3000/api/orders?orderID=${orderID}`);
     if (!orderResponse.ok) throw new Error("Failed to fetch order details");
     const { order } = await orderResponse.json();
     console.log("02 Fetched order details:", order);

@@ -1,19 +1,21 @@
-"use client"; // Marks this as a client component
+"use client";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 
 export default function ReviewPage() {
-  const searchParams = useSearchParams(); // To get query parameters
-  const router = useRouter(); // For navigation
-  const [data, setData] = useState(null); // To store fetched data
-  const [error, setError] = useState(null); // To handle errors
-  const [loading, setLoading] = useState(false); // To show loading on submit
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const [data, setData] = useState(null);
+  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [fetching, setFetching] = useState(true); // New fetching state
 
   useEffect(() => {
     const fetchData = async () => {
-      const id = searchParams.get("id"); // Get the `id` from the query parameter
+      const id = searchParams.get("id");
       if (!id) {
         setError("ID not provided");
+        setFetching(false);
         return;
       }
 
@@ -23,48 +25,83 @@ export default function ReviewPage() {
         if (!response.ok) throw new Error("Failed to fetch data");
 
         const result = await response.json();
+        if (!result || Object.keys(result).length === 0) {
+          throw new Error("No data found for this ID");
+        }
+
         setData(result);
       } catch (err) {
         console.error("Error fetching data:", err);
         setError(err.message || "An unexpected error occurred");
+      } finally {
+        setFetching(false);
       }
     };
 
     fetchData();
-  }, [searchParams]);
+  }, [searchParams.toString()]); // Avoid unnecessary re-fetches
 
   const handleSubmit = async () => {
     const id = searchParams.get("id");
+    if (!id) {
+      alert("Invalid ID");
+      return;
+    }
+
     setLoading(true);
     try {
       const response = await fetch("/api/orchestrator", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ orderID: id }), // Pass the fetched data
+        body: JSON.stringify({ orderID: id }),
       });
 
       if (!response.ok) throw new Error("Submission failed");
 
       const result = await response.json();
-      console.log("Response:", result);
+      if (!result.id) throw new Error("Invalid response from server");
 
-      // Navigate to the success page with the ID
       router.push(`/pages/success?id=${result.id}`);
     } catch (error) {
       console.error("Error submitting data:", error);
-      alert("Failed to submit data. Please try again.");
+      alert(error.message || "Failed to submit data. Please try again.");
     } finally {
       setLoading(false);
     }
   };
 
-  if (error) {
-    return <div>Error: {error}</div>;
-  }
 
-  if (!data) {
-    return <div>Loading...</div>;
-  }
+  const handleRecreate = async () => {
+    const id = searchParams.get("id");
+    if (!id) {
+      alert("Invalid ID");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const response = await fetch("/api/orchestrator", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ orderID: id }),
+      });
+
+      if (!response.ok) throw new Error("Submission failed");
+
+      const result = await response.json();
+      if (!result.id) throw new Error("Invalid response from server");
+
+      router.push(`/pages/success?id=${result.id}`);
+    } catch (error) {
+      console.error("Error submitting data:", error);
+      alert(error.message || "Failed to submit data. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };  
+
+  if (fetching) return <div>Loading...</div>;
+  if (error) return <div>Error: {error}</div>;
 
   return (
     <div style={{ padding: "20px" }}>
@@ -85,6 +122,20 @@ export default function ReviewPage() {
           }}
         >
           Go Back
+        </button>
+        <button
+          onClick={handleRecreate}
+          disabled={loading}
+          style={{
+            padding: "10px 20px",
+            backgroundColor: loading ? "#c0c0c0" : "#007BFF",
+            color: "#fff",
+            border: "none",
+            borderRadius: "5px",
+            cursor: loading ? "not-allowed" : "pointer",
+          }}
+        >
+          {loading ? "Recreating..." : "Recreate"}
         </button>
         <button
           onClick={handleSubmit}

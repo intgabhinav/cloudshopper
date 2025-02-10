@@ -1,5 +1,6 @@
 {
+  "/api/order/route": "app/api/order/route.js",
   "/api/options/[option]/route": "app/api/options/[option]/route.js",
-  "/favicon.ico/route": "app/favicon.ico/route.js",
+  "/pages/review/page": "app/pages/review/page.js",
   "/page": "app/page.js"
 }
