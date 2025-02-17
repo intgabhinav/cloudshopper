@@ -12,8 +12,6 @@ export async function POST(req) {
   try {
     const body = await req.json();
     const { collectionName, job, ...data } = body;
-
-    console.log("Received POST request:", body);
     const timestamps = {
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
@@ -51,7 +49,6 @@ export async function GET(req) {
     const { searchParams } = new URL(req.url);
     const collectionName = searchParams.get("collectionName");
     const filter = JSON.parse(searchParams.get("filter"));
-
     const result = await readRecord(collectionName, filter);
 
     if (!result) {
@@ -78,8 +75,6 @@ export async function GET(req) {
 export async function PUT(req) {
   try {
     const body = await req.json();
-    console.log("Received PUT request:", body);
-
     // if (!body.collectionName || !body.filter || !body.data) {
     //   throw new Error("Invalid request: Missing required fields");
     // }
@@ -108,7 +103,6 @@ export async function PUT(req) {
     );
   }
 }
-
 
 // Handle DELETE requests for deleting records
 export async function DELETE(req) {

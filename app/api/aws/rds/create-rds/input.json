@@ -1,0 +1,18 @@
+{
+    "region" : "us-east-1",
+    "inputs" : {
+        "VpcId": "vpc-046242a32f8d06dbe",
+        "subnetIds" : ["subnet-0efa8a50f26e5dad8", "subnet-00a217efc3307a6f2"],
+        "securityGroupName" : "DBSG",
+        "securityGroupDesc" : "DBSG",
+        "dbSubnetGroupName" : "DBSG",
+        "credentials" : {
+            "username" : "dbadmin",
+            "password" : "inteladmin2025"
+        },
+        "dbInstanceIdentifier" : "webdb",
+        "dbInstanceClass" : "db.t3.medium",
+        "allocatedStorage": 20,
+        "dbName": "mydatabase"
+    }
+}

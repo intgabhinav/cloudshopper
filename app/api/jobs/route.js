@@ -3,7 +3,6 @@ export const runtime = "nodejs";
 export async function POST(req) {
   try {
     const body = await req.json();
-    console.log("Received data:", body);
     const { orderID, region, name, api, type, inputs, status = "created" } = body;
 
     if (!orderID || !name || !type || !inputs || !region) {
@@ -34,7 +33,6 @@ export async function POST(req) {
       });
     
     const res = await response.json();
-    console.log("Creating jobs:", res);
 
     return new Response(JSON.stringify({ success: true, "id": res.id || "" }), {
       headers: { "Content-Type": "application/json" },

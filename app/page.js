@@ -58,7 +58,7 @@ export default function Home() {
     };
 
     try {
-      const response = await fetch('/api/order', {
+      const response = await fetch('/api/orderbuilder', {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),

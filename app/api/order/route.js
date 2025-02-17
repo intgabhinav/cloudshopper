@@ -4,7 +4,6 @@ export async function GET(req) {
 
     const { searchParams } = new URL(req.url);
     const orderID = searchParams.get("orderID");
-    console.log("Received data:", orderID);
 
     // Fetch order details logic
     const filter = JSON.stringify({ _id: orderID });

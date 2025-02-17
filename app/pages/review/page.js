@@ -59,9 +59,9 @@ export default function ReviewPage() {
       if (!response.ok) throw new Error("Submission failed");
 
       const result = await response.json();
-      if (!result.id) throw new Error("Invalid response from server");
+      // if (!result.id) throw new Error("Invalid response from server");
 
-      router.push(`/pages/success?id=${result.id}`);
+      router.push(`/pages/success?id=${id}`);
     } catch (error) {
       console.error("Error submitting data:", error);
       alert(error.message || "Failed to submit data. Please try again.");
@@ -71,7 +71,7 @@ export default function ReviewPage() {
   };
 
 
-  const handleRecreate = async () => {
+  const handleUpdate = async () => {
     const id = searchParams.get("id");
     if (!id) {
       alert("Invalid ID");
@@ -80,21 +80,20 @@ export default function ReviewPage() {
 
     setLoading(true);
     try {
-      const response = await fetch("/api/orchestrator", {
+      const response = await fetch("/api/orderupdate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ orderID: id }),
       });
 
-      if (!response.ok) throw new Error("Submission failed");
+      if (!response.ok) throw new Error("Update failed");
 
       const result = await response.json();
-      if (!result.id) throw new Error("Invalid response from server");
 
-      router.push(`/pages/success?id=${result.id}`);
+      router.push(`/pages/review?id=${id}`);
     } catch (error) {
-      console.error("Error submitting data:", error);
-      alert(error.message || "Failed to submit data. Please try again.");
+      console.error("Error updating data:", error);
+      alert(error.message || "Failed to update data. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -124,7 +123,7 @@ export default function ReviewPage() {
           Go Back
         </button>
         <button
-          onClick={handleRecreate}
+          onClick={handleUpdate}
           disabled={loading}
           style={{
             padding: "10px 20px",
@@ -135,7 +134,7 @@ export default function ReviewPage() {
             cursor: loading ? "not-allowed" : "pointer",
           }}
         >
-          {loading ? "Recreating..." : "Recreate"}
+          {loading ? "Updating..." : "Update"}
         </button>
         <button
           onClick={handleSubmit}
