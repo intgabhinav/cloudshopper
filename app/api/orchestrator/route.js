@@ -136,9 +136,11 @@ export async function POST(req) {
 // Helper function to resolve inputs dynamically
 function resolveInputs(templateInputs, parentNames, completedJobs, inputFields) {
   const resolvedInputs = JSON.parse(JSON.stringify(templateInputs)); // Deep copy
+  console.log ("resolvedInputs02: " , resolvedInputs, parentNames,completedJobs, inputFields);
 
   // Replace placeholders with input fields
   Object.keys(resolvedInputs).forEach(key => {
+    console.log("Map: " , key, resolvedInputs[key]);
 
       if (typeof resolvedInputs[key] === 'string') {
           resolvedInputs[key] = resolvedInputs[key].replace(/\{inputFields\.(\w+)\}/g, (_, field) => inputFields[field] || '');
